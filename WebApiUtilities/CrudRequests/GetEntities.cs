@@ -12,7 +12,7 @@ namespace WebApiUtilities.CrudRequests
     {
     }
 
-    public abstract class GetEntitiesHandler<T, TId> : IRequestHandler<GetEntities<T, TId>, IQueryable<T>>
+    public class GetEntitiesHandler<T, TId> : IRequestHandler<GetEntities<T, TId>, IQueryable<T>>
         where T : class, IHasId<TId>
     {
         readonly DbContext Context;

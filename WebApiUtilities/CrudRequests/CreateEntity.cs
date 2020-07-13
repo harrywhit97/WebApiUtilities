@@ -7,22 +7,27 @@ using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.CrudRequests
 {
-    public abstract class CreateEntityFromRequestHandler<T, TId, TRequest> : IRequestHandler<TRequest, T>
+    public class CreateEntity<T, TDto> : IRequest<T>
+    {
+        public TDto Entity { get; set; }
+    }
+
+    public class CreateEntityHandler<T, TId, TDto> : IRequestHandler<CreateEntity<T, TDto>, T>
         where T : class, IHasId<TId>
-        where TRequest : IRequest<T>, IMapFrom<T>
+        where TDto : class
     {
         readonly protected DbContext Context;
         readonly protected IMapper Mapper;
 
-        public CreateEntityFromRequestHandler(DbContext dbContext, IMapper mapper)
+        public CreateEntityHandler(DbContext dbContext, IMapper mapper)
         {
             Context = dbContext;
             Mapper = mapper;
         }
 
-        public async Task<T> Handle(TRequest request, CancellationToken cancellationToken)
+        public async Task<T> Handle(CreateEntity<T, TDto> request, CancellationToken cancellationToken)
         {
-            var entity = Mapper.Map<T>(request);
+            var entity = Mapper.Map<T>(request.Entity);
             Context.Set<T>().Add(entity);
             await Context.SaveChangesAsync();
             return entity;

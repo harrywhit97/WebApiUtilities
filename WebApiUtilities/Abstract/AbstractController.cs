@@ -5,9 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WebApiUtilities.CrudRequests;
@@ -16,10 +14,9 @@ using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.Abstract
 {
-    public abstract class AbstractController<T, TId, TCreateEnityRequest, TUpdateEntityRequest> : ApiController
-            where T : class, IHasId<TId>
-            where TCreateEnityRequest : class, IRequest<T>, IMapFrom<T>
-            where TUpdateEntityRequest : class, IRequest<T>, IMapFrom<T>
+    public abstract class AbstractController<T, TId, TDto> : ApiController
+        where T : class, IHasId<TId>
+        where TDto : class
     {
         readonly ILogger Logger;
 
@@ -65,7 +62,7 @@ namespace WebApiUtilities.Abstract
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Post([FromBody] TCreateEnityRequest dto)
+        public async Task<IActionResult> Post([FromBody] CreateEntity<T, TDto> dto)
         {
             Logger.LogDebug("Recieved Post request");
             try
@@ -84,7 +81,7 @@ namespace WebApiUtilities.Abstract
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Put([FromBody] TUpdateEntityRequest dto)
+        public async Task<IActionResult> Put([FromBody] UpdateEntity<T, TId, TDto> dto)
         {
             Logger.LogDebug("Recieved Put request");
 

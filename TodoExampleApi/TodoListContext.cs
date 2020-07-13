@@ -12,6 +12,7 @@ namespace TodoExampleApi
         public IClock Clock { get; set; }
 
         public TodoListContext(DbContextOptions<TodoListContext> options, IClock clock)
+            :base(options)
         {
             Clock = clock;
         }

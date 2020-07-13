@@ -18,7 +18,7 @@ namespace WebApiUtilities.CrudRequests
         }
     }
 
-    public abstract class DeleteEntityHandler<T, TId> : IRequestHandler<DeleteEntity<T, TId>, bool>
+    public class DeleteEntityHandler<T, TId> : IRequestHandler<DeleteEntity<T, TId>, bool>
         where T : class, IHasId<TId>
     {
         readonly DbContext Context;
