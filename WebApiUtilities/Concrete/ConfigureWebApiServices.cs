@@ -7,9 +7,12 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using WebApiUtilities.Abstract;
+using WebApiUtilities.CrudRequests;
 using WebApiUtilities.Interfaces;
 using WebApiUtilities.PipelineBehaviours;
 
@@ -57,6 +60,20 @@ namespace WebApiUtilities.Concrete
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
+        }
+
+        public static void RegisterCrudActionsForType<T, TId, TDto, TDbContext, TCreateCommand, TUpdateCommand>(IServiceCollection services)
+            where T : Entity<TId>
+            where TDto : class
+            where TDbContext : DbContext
+            where TCreateCommand : class, TDto, ICreateCommand<T, TId>
+            where TUpdateCommand : class, TDto, IUpdateCommand<T, TId>
+        {
+            services.AddTransient(typeof(IRequestHandler<TCreateCommand, T>), typeof(CreateEntityHandler<T, TId, TCreateCommand, TDbContext>));
+            services.AddTransient(typeof(IRequestHandler<TUpdateCommand, T>), typeof(UpdateEntityHandler<T, TId, TUpdateCommand, TDbContext>));
+            services.AddTransient(typeof(IRequestHandler<GetEntities<T, TId>, IQueryable<T>>), typeof(GetEntitiesHandler<T, TId, IGetEntities<T, TId>, TDbContext>));
+            services.AddTransient(typeof(IRequestHandler<GetEntityById<T, TId>, T>), typeof(GetEntityByIdHandler<T, TId, TDbContext>));
+            services.AddTransient(typeof(IRequestHandler<DeleteEntity<T, TId>, bool>), typeof(DeleteEntityHandler<T, TId, TDbContext>));
         }
     }
 }

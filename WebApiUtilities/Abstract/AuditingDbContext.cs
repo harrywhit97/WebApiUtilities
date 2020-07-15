@@ -14,7 +14,7 @@ namespace WebApiUtilities.Abstract
 
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
-            foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
+            foreach (var entry in ChangeTracker.Entries<AuditableEntity<long>>()) //TODO change <long> to find any auditible entity
             {
                 switch (entry.State)
                 {

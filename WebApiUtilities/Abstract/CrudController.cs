@@ -1,68 +1,30 @@
-﻿using MediatR;
-using Microsoft.AspNet.OData;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WebApiUtilities.CrudRequests;
 using WebApiUtilities.Exceptions;
-using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.Abstract
 {
-    public abstract class AbstractController<T, TId, TDto> : ApiController
-        where T : class, IHasId<TId>
+    public abstract class CrudController<T, TId, TDto, TCreateCommand, TUpdateCommand> : ReadOnlyController<T, TId>
+        where T : Entity<TId>
         where TDto : class
+        where TCreateCommand : ICreateCommand<T, TId>
+        where TUpdateCommand : IUpdateCommand<T, TId>
     {
-        readonly ILogger Logger;
-
-        public AbstractController(DbContext context, ILogger logger)
+        public CrudController(DbContext context, ILogger logger)
+            :base(context, logger)
         {
-            Logger = logger;
-            context.Database.EnsureCreated(); //move this
-        }
-
-        [HttpGet]
-        [EnableQuery]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public virtual IQueryable<T> Get()
-        {
-            Logger.LogDebug("Recieved Get request");
-            return Mediator.Send(new GetEntities<T, TId>()).Result;
-        }
-
-        [HttpGet("{Id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public virtual async Task<IActionResult> Get(TId Id)
-        {
-            Logger.LogDebug("Recieved GetById request");
-
-            try
-            {
-                return Ok(await Mediator.Send(new GetEntityById<T, TId>(Id)));
-            }
-            catch (NotFoundException e)
-            {
-                Logger.LogError(e, "There was an error processing a Get request");
-                return NotFound(e.Message);
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e, "There was an error processing a Get request");
-                return BadRequest(e.Message);
-            }
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Post([FromBody] CreateEntity<T, TDto> dto)
+        public async Task<IActionResult> Post([FromBody] TCreateCommand dto)
         {
             Logger.LogDebug("Recieved Post request");
             try
@@ -81,7 +43,7 @@ namespace WebApiUtilities.Abstract
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Put([FromBody] UpdateEntity<T, TId, TDto> dto)
+        public async Task<IActionResult> Put([FromBody] TUpdateCommand dto)
         {
             Logger.LogDebug("Recieved Put request");
 

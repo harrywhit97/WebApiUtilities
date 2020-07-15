@@ -3,31 +3,37 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
+using WebApiUtilities.Abstract;
 using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.CrudRequests
 {
-    public class CreateEntity<T, TDto> : IRequest<T>
+    public interface ICreateCommand<T, TId> : IRequest<T>, IMapFrom<T>
+        where T : Entity<TId>
+    { }
+
+    public class CreateCommand<T, TId> : ICreateCommand<T, TId> 
+        where T : Entity<TId>
     {
-        public TDto Entity { get; set; }
     }
 
-    public class CreateEntityHandler<T, TId, TDto> : IRequestHandler<CreateEntity<T, TDto>, T>
-        where T : class, IHasId<TId>
-        where TDto : class
+    public class CreateEntityHandler<T, TId, TCreateCommand, TDbContext> : IRequestHandler<TCreateCommand, T>
+        where T : Entity<TId>
+        where TCreateCommand : class, ICreateCommand<T, TId>, IMapFrom<T>
+        where TDbContext : DbContext
     {
-        readonly protected DbContext Context;
+        readonly protected TDbContext Context;
         readonly protected IMapper Mapper;
 
-        public CreateEntityHandler(DbContext dbContext, IMapper mapper)
+        public CreateEntityHandler(TDbContext dbContext, IMapper mapper)
         {
             Context = dbContext;
             Mapper = mapper;
         }
 
-        public async Task<T> Handle(CreateEntity<T, TDto> request, CancellationToken cancellationToken)
+        public async Task<T> Handle(TCreateCommand command, CancellationToken cancellationToken)
         {
-            var entity = Mapper.Map<T>(request.Entity);
+            var entity = Mapper.Map<T>(command);
             Context.Set<T>().Add(entity);
             await Context.SaveChangesAsync();
             return entity;

@@ -2,13 +2,18 @@
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
+using WebApiUtilities.Abstract;
 using WebApiUtilities.Exceptions;
 using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.CrudRequests
 {
-    public class GetEntityById<T, TId> : IRequest<T>
-        where T : class, IHasId<TId>
+    public interface IGetEntityById<T, TId> : IRequest<T>, IHasId<TId>
+        where T : Entity<TId>
+    { }
+
+    public class GetEntityById<T, TId> : IGetEntityById<T, TId>
+        where T : Entity<TId>
     {
         public TId Id { get; set; }
 
@@ -18,12 +23,13 @@ namespace WebApiUtilities.CrudRequests
         }
     }
 
-    public abstract class GetEntityByIdHandler<T, TId> : IRequestHandler<GetEntityById<T, TId>, T>
-        where T : class, IHasId<TId>
+    public class GetEntityByIdHandler<T, TId, TDbContext> : IRequestHandler<GetEntityById<T, TId>, T>
+        where T : Entity<TId>
+        where TDbContext : DbContext
     {
-        readonly DbContext Context;
+        readonly TDbContext Context;
 
-        public GetEntityByIdHandler(DbContext dbContext)
+        public GetEntityByIdHandler(TDbContext dbContext)
         {
             Context = dbContext;
         }

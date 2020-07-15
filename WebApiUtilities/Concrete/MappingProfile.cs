@@ -10,7 +10,7 @@ namespace WebApiUtilities.Concrete
     {
         public MappingProfile()
         {
-            ApplyMappingsFromAssembly(Assembly.GetExecutingAssembly());
+            ApplyMappingsFromAssembly(Assembly.GetEntryAssembly());
         }
 
         void ApplyMappingsFromAssembly(Assembly assembly)

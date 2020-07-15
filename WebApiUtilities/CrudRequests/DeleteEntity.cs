@@ -2,13 +2,18 @@
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
+using WebApiUtilities.Abstract;
 using WebApiUtilities.Exceptions;
 using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.CrudRequests
 {
-    public class DeleteEntity<T, TId> : IRequest<bool>
-        where T : class, IHasId<TId>
+    public interface IDeleteEntity<T, TId> : IRequest<bool>, IHasId<TId>
+        where T : Entity<TId>
+    { }
+
+    public class DeleteEntity<T, TId> : IDeleteEntity<T, TId>
+        where T : Entity<TId>
     {
         public TId Id { get; set; }
 
@@ -18,17 +23,18 @@ namespace WebApiUtilities.CrudRequests
         }
     }
 
-    public class DeleteEntityHandler<T, TId> : IRequestHandler<DeleteEntity<T, TId>, bool>
-        where T : class, IHasId<TId>
+    public class DeleteEntityHandler<T, TId, TDbContext> : IRequestHandler<IDeleteEntity<T, TId>, bool>
+        where T : Entity<TId>
+        where TDbContext : DbContext
     {
-        readonly DbContext Context;
+        readonly TDbContext Context;
 
-        public DeleteEntityHandler(DbContext dbContext)
+        public DeleteEntityHandler(TDbContext dbContext)
         {
             Context = dbContext;
         }
 
-        public async Task<bool> Handle(DeleteEntity<T, TId> request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(IDeleteEntity<T, TId> request, CancellationToken cancellationToken)
         {
             var entity = await Context.Set<T>().FindAsync(request.Id)
                 ?? throw new NotFoundException(typeof(T).Name, request.Id);
