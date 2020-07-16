@@ -9,7 +9,7 @@ namespace TodoExampleApi.Features.TodoItems
         public void Configure(EntityTypeBuilder<TodoItem> builder)
         {
             builder.Property(x => x.Description)
-                .HasMaxLength(50);
+                .HasMaxLength(20);
         }
     }
 }

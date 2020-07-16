@@ -1,6 +1,9 @@
-﻿namespace TodoExampleApi.Features.TodoLists
+﻿using TodoExampleApi.Models;
+using WebApiUtilities.Abstract;
+
+namespace TodoExampleApi.Features.TodoLists
 {
-    public class TodoListDto
+    public class TodoListDto : Dto<TodoList, long>
     {
         public string ListName { get; set; }
     }

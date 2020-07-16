@@ -4,11 +4,10 @@ using WebApiUtilities.Interfaces;
 
 namespace TodoExampleApi.Models
 {
-    public class TodoList : AuditableEntity, IHasId<long>
+    public class TodoList : AuditableEntity<long>
     {
-        public long Id { get; set; }
         public string ListName { get; set; }
-        public IList<TodoItem> Todos { get; set; }
+        public virtual IList<TodoItem> Todos { get; set; }
 
         public TodoList()
         {

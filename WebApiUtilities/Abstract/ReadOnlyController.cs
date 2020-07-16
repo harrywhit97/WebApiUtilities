@@ -25,7 +25,7 @@ namespace WebApiUtilities.Abstract
         [HttpGet]
         [EnableQuery]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public virtual IQueryable<T> Get()
+        public IQueryable<T> Get()
         {
             Logger.LogDebug("Recieved Get request");
             return Mediator.Send(new GetEntities<T, TId>()).Result;
@@ -35,7 +35,7 @@ namespace WebApiUtilities.Abstract
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public virtual async Task<IActionResult> Get(TId Id)
+        public async Task<IActionResult> GetById(TId Id)
         {
             Logger.LogDebug("Recieved GetById request");
 

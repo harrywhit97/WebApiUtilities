@@ -7,7 +7,7 @@ namespace WebApiUtilities.Abstract
     [Route("api/[controller]")]
     public abstract class ApiController : ControllerBase
     {
-        private IMediator mediator;
+        IMediator mediator;
         protected IMediator Mediator => mediator ??= HttpContext.RequestServices.GetService(typeof(IMediator)) as IMediator;
     }
 }

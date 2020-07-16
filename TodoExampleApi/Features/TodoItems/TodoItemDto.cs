@@ -1,6 +1,9 @@
-﻿namespace TodoExampleApi.Features.TodoItems
+﻿using TodoExampleApi.Models;
+using WebApiUtilities.Abstract;
+
+namespace TodoExampleApi.Features.TodoItems
 {
-    public class TodoItemDto
+    public class TodoItemDto : Dto<TodoItem, long>
     {
         public string Description { get; set; }
     }

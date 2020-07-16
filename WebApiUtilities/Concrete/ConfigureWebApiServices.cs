@@ -7,12 +7,9 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
-using WebApiUtilities.Abstract;
-using WebApiUtilities.CrudRequests;
 using WebApiUtilities.Interfaces;
 using WebApiUtilities.PipelineBehaviours;
 
@@ -24,16 +21,9 @@ namespace WebApiUtilities.Concrete
         {
             services.AddOData();
 
-            services.AddMvc()
-                .AddControllersAsServices()
-                .AddJsonOptions(options => {
-                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                    options.JsonSerializerOptions.IgnoreNullValues = true;
-                });
-
-            //Work around to enable swagger with Odata
-            services.AddMvcCore(options =>
+            services.AddMvc(options =>
             {
+                //Work around to enable swagger with Odata
                 foreach (var outputFormatter in options.OutputFormatters.OfType<ODataOutputFormatter>().Where(_ => _.SupportedMediaTypes.Count == 0))
                 {
                     outputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/prs.odatatestxx-odata"));
@@ -42,6 +32,11 @@ namespace WebApiUtilities.Concrete
                 {
                     inputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/prs.odatatestxx-odata"));
                 }
+            })
+                .AddControllersAsServices()
+                .AddJsonOptions(options => {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    options.JsonSerializerOptions.IgnoreNullValues = true;
             });
 
             services.AddSwaggerGen(c =>
@@ -60,20 +55,23 @@ namespace WebApiUtilities.Concrete
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
+
+            RegisterCrudActionsForRecords(services);
         }
 
-        public static void RegisterCrudActionsForType<T, TId, TDto, TDbContext, TCreateCommand, TUpdateCommand>(IServiceCollection services)
-            where T : Entity<TId>
-            where TDto : class
-            where TDbContext : DbContext
-            where TCreateCommand : class, TDto, ICreateCommand<T, TId>
-            where TUpdateCommand : class, TDto, IUpdateCommand<T, TId>
+        static void RegisterCrudActionsForRecords(IServiceCollection services)
         {
-            services.AddTransient(typeof(IRequestHandler<TCreateCommand, T>), typeof(CreateEntityHandler<T, TId, TCreateCommand, TDbContext>));
-            services.AddTransient(typeof(IRequestHandler<TUpdateCommand, T>), typeof(UpdateEntityHandler<T, TId, TUpdateCommand, TDbContext>));
-            services.AddTransient(typeof(IRequestHandler<GetEntities<T, TId>, IQueryable<T>>), typeof(GetEntitiesHandler<T, TId, IGetEntities<T, TId>, TDbContext>));
-            services.AddTransient(typeof(IRequestHandler<GetEntityById<T, TId>, T>), typeof(GetEntityByIdHandler<T, TId, TDbContext>));
-            services.AddTransient(typeof(IRequestHandler<DeleteEntity<T, TId>, bool>), typeof(DeleteEntityHandler<T, TId, TDbContext>));
+            var assembly = Assembly.GetEntryAssembly();
+
+            var types = assembly.GetExportedTypes()
+                .Where(x => x.GetInterfaces().Any(i => i.Name == nameof(IRecord)));
+
+            foreach (var type in types)
+            {
+                var instance = Activator.CreateInstance(type) as IRecord;
+
+                instance.RegisterServices(services);
+            }
         }
     }
 }
