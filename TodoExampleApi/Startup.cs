@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -10,11 +11,14 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OData.Edm;
 using TodoExampleApi.Models;
 using WebApiUtilities.Concrete;
+using WebApiUtilities.Extenstions;
 
 namespace TodoExampleApi
 {
     public class Startup
     {
+        const int ApiVersion = 1;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -30,7 +34,7 @@ namespace TodoExampleApi
             services.AddDbContext<TodoListContext>(options =>
                 options.UseSqlServer(connectionString));
 
-            ConfigureWebApiServices.ConfigureServices(services);
+            services.AddWebApiServices(ApiVersion);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,24 +55,19 @@ namespace TodoExampleApi
             {
                 endpoints.EnableDependencyInjection();
                 endpoints.MapControllers();
-                endpoints.Select().Filter().OrderBy().Count().MaxTop(10).Expand();
-                endpoints.MapODataRoute("query", "query", GetEdmModel());
+                endpoints.AddOdata("query", GetEdmModel(), 10);
             });
 
-            app.UseSwagger();
-
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-            });
+            app.AddSwagger(ApiVersion);
         }
         IEdmModel GetEdmModel()
         {
             var odataBuilder = new ODataConventionModelBuilder();
+
             odataBuilder.EntitySet<TodoItem>(nameof(TodoItem));
             odataBuilder.EntitySet<TodoList>(nameof(TodoList));
+
             return odataBuilder.GetEdmModel();
         }
-
     }
 }

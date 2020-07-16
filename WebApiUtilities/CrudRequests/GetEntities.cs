@@ -4,36 +4,29 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WebApiUtilities.Abstract;
-using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.CrudRequests
 {
     public interface IGetEntities<T, TId> : IRequest<IQueryable<T>> 
         where T : Entity<TId>
-    {
-    }
+    { }
 
     public class GetEntities<T, TId> : IGetEntities<T, TId> 
         where T : Entity<TId>
-    { 
-    }
+    { }
 
-
-    public class GetEntitiesHandler<T, TId, TRequest, TDbContext> : IRequestHandler<TRequest, IQueryable<T>>
-        where T : class, IHasId<TId>
+    public class GetEntitiesHandler<T, TId, TRequest, TDbContext> : AbstractRequestHandler<TRequest, IQueryable<T>, TDbContext>
+        where T : Entity<TId>
         where TDbContext : DbContext
         where TRequest : IRequest<IQueryable<T>>
     {
-        readonly TDbContext Context;
+        public GetEntitiesHandler(TDbContext dbContext) 
+            : base(dbContext)
+        { }
 
-        public GetEntitiesHandler(TDbContext dbContext)
+        public override Task<IQueryable<T>> Handle(TRequest request, CancellationToken cancellationToken)
         {
-            Context = dbContext;
-        }
-
-        public Task<IQueryable<T>> Handle(TRequest request, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(Context.Set<T>().AsQueryable());
+            return Task.FromResult(dbContext.Set<T>().AsQueryable());
         }
     }
 }

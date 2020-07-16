@@ -14,27 +14,17 @@ namespace WebApiUtilities.CrudRequests
     {
     }
 
-    public abstract class UpdateCommand<T, TId> : IUpdateCommand<T, TId>
-        where T : Entity<TId>
-    {
-        public TId Id { get; set; }
-    }
-
-    public class UpdateEntityHandler<T, TId, TUpdateCommand, TDbContext> : IRequestHandler<TUpdateCommand, T>
+    public class UpdateEntityHandler<T, TId, TUpdateCommand, TDbContext> : AbstractRequestHandler<TUpdateCommand, T, TDbContext>
         where T : Entity<TId>
         where TUpdateCommand : class, IUpdateCommand<T, TId>, IHasId<TId>
         where TDbContext : DbContext
     {
-        readonly protected TDbContext dbContext;
         readonly protected IMapper mapper;
 
         public UpdateEntityHandler(TDbContext dbContext, IMapper mapper)
-        {
-            this.dbContext = dbContext;
-            this.mapper = mapper;
-        }
+            : base(dbContext) => this.mapper = mapper;
 
-        public async Task<T> Handle(TUpdateCommand command, CancellationToken cancellationToken)
+        public override async Task<T> Handle(TUpdateCommand command, CancellationToken cancellationToken)
         {
             var existingEntity = await dbContext.Set<T>().FindAsync(command.Id)
                 ?? throw new NotFoundException(typeof(T).Name, command.Id);

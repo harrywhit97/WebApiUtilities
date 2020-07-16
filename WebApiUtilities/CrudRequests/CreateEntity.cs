@@ -12,30 +12,21 @@ namespace WebApiUtilities.CrudRequests
         where T : Entity<TId>
     { }
 
-    public class CreateCommand<T, TId> : ICreateCommand<T, TId> 
-        where T : Entity<TId>
-    {
-    }
-
-    public class CreateEntityHandler<T, TId, TCreateCommand, TDbContext> : IRequestHandler<TCreateCommand, T>
+    public class CreateEntityHandler<T, TId, TCreateCommand, TDbContext> : AbstractRequestHandler<TCreateCommand, T, TDbContext>
         where T : Entity<TId>
         where TCreateCommand : class, ICreateCommand<T, TId>, IMapFrom<T>
         where TDbContext : DbContext
     {
-        readonly protected TDbContext Context;
-        readonly protected IMapper Mapper;
+        readonly protected IMapper mapper;
 
         public CreateEntityHandler(TDbContext dbContext, IMapper mapper)
-        {
-            Context = dbContext;
-            Mapper = mapper;
-        }
+            : base(dbContext) => this.mapper = mapper;
 
-        public async Task<T> Handle(TCreateCommand command, CancellationToken cancellationToken)
+        public override async Task<T> Handle(TCreateCommand command, CancellationToken cancellationToken)
         {
-            var entity = Mapper.Map<T>(command);
-            Context.Set<T>().Add(entity);
-            await Context.SaveChangesAsync();
+            var entity = mapper.Map<T>(command);
+            dbContext.Set<T>().Add(entity);
+            await dbContext.SaveChangesAsync();
             return entity;
         }
     }

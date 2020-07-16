@@ -12,35 +12,27 @@ namespace WebApiUtilities.CrudRequests
         where T : Entity<TId>
     { }
 
-    public class DeleteEntity<T, TId> : IDeleteEntity<T, TId>
+    public class DeleteEntity<T, TId> : Entity<TId>, IDeleteEntity<T, TId>
         where T : Entity<TId>
     {
-        public TId Id { get; set; }
-
-        public DeleteEntity(TId id)
-        {
-            Id = id;
-        }
+        public DeleteEntity(TId id) => Id = id;
     }
 
-    public class DeleteEntityHandler<T, TId, TDbContext> : IRequestHandler<IDeleteEntity<T, TId>, bool>
+    public class DeleteEntityHandler<T, TId, TDbContext> : AbstractRequestHandler<IDeleteEntity<T, TId>, bool, TDbContext>
         where T : Entity<TId>
         where TDbContext : DbContext
     {
-        readonly TDbContext Context;
-
         public DeleteEntityHandler(TDbContext dbContext)
-        {
-            Context = dbContext;
-        }
+            : base(dbContext) 
+        { }
 
-        public async Task<bool> Handle(IDeleteEntity<T, TId> request, CancellationToken cancellationToken)
+        public override async Task<bool> Handle(IDeleteEntity<T, TId> request, CancellationToken cancellationToken)
         {
-            var entity = await Context.Set<T>().FindAsync(request.Id)
+            var entity = await dbContext.Set<T>().FindAsync(request.Id)
                 ?? throw new NotFoundException(typeof(T).Name, request.Id);
 
-            Context.Set<T>().Remove(entity);
-            Context.SaveChanges();
+            dbContext.Set<T>().Remove(entity);
+            dbContext.SaveChanges();
             return true;
         }
     }

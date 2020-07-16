@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -8,17 +7,19 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using WebApiUtilities.Concrete;
 using WebApiUtilities.Interfaces;
 using WebApiUtilities.PipelineBehaviours;
 
-namespace WebApiUtilities.Concrete
+namespace WebApiUtilities.Extenstions
 {
-    public static class ConfigureWebApiServices
+    public static class IServiceCollectionExtensions
     {
-        public static void ConfigureServices(IServiceCollection services)
+        public static void AddWebApiServices(this IServiceCollection services, int apiVersion)
         {
             services.AddOData();
             services.AddControllers();
@@ -42,7 +43,7 @@ namespace WebApiUtilities.Concrete
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+                c.SwaggerDoc($"v{apiVersion}", new OpenApiInfo { Title = "My API", Version = $"v{apiVersion}" });
             });
 
             services.AddLogging();
@@ -70,7 +71,6 @@ namespace WebApiUtilities.Concrete
             foreach (var type in types)
             {
                 var instance = Activator.CreateInstance(type) as IRecord;
-
                 instance.RegisterServices(services);
             }
         }
