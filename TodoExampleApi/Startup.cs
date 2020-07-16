@@ -32,7 +32,7 @@ namespace TodoExampleApi
             var connectionString = Configuration.GetConnectionString("Database");
 
             services.AddDbContext<TodoListContext>(options =>
-                options.UseSqlServer(connectionString));
+                options.UseInMemoryDatabase("Todo"));
 
             services.AddWebApiServices(ApiVersion);
         }

@@ -10,7 +10,7 @@ namespace WebApiUtilities.PipelineBehaviours
     public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
             where TRequest : IRequest<TResponse>
     {
-        private readonly IEnumerable<IValidator<TRequest>> validators;
+        readonly IEnumerable<IValidator<TRequest>> validators;
 
         public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
         {
@@ -19,7 +19,6 @@ namespace WebApiUtilities.PipelineBehaviours
 
         public Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
-            //request = Utils.SanatizeData.SanitizeStrings(request);
             if (validators.Any())
             {
                 var context = new ValidationContext<TRequest>(request);
