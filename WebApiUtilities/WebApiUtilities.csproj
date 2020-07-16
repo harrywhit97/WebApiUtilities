@@ -7,12 +7,14 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="FluentValidation" Version="9.0.0" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="FluentValidation" Version="9.0.1" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="9.0.1" />
     <PackageReference Include="MediatR" Version="8.0.2" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="8.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.6" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="7.4.1" />
+    <PackageReference Include="Microsoft.AspNetCore.OData.Versioning" Version="4.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0-preview.6.20312.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.0-preview.6.20312.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.0-preview.6.20312.4">
@@ -21,6 +23,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0-preview.6.20305.6" />
     <PackageReference Include="Microsoft.OData.Edm" Version="7.7.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
   </ItemGroup>
 

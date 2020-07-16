@@ -7,9 +7,8 @@ using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.Abstract
 {
-    public abstract class ChangeableRecord<T, TId, TDto, TDbContext, TCreateCommand, TUpdateCommand, TCreateValidator, TUpdateValidator> : ReadOnlyRecord<T, TId, TDbContext>, IChangeableRecord
+    public abstract class ChangeableRecord<T, TId, TDbContext, TCreateCommand, TUpdateCommand, TCreateValidator, TUpdateValidator> : ReadOnlyRecord<T, TId, TDbContext>, IChangeableRecord
         where T : Entity<TId>
-        where TDto : Dto<T, TId>
         where TDbContext : DbContext
         where TCreateCommand : Dto<T, TId>, ICreateCommand<T, TId>
         where TUpdateCommand : Dto<T, TId>, IUpdateCommand<T, TId>

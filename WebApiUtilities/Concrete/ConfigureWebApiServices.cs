@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -20,23 +21,23 @@ namespace WebApiUtilities.Concrete
         public static void ConfigureServices(IServiceCollection services)
         {
             services.AddOData();
+            services.AddControllers();
 
-            services.AddMvc(options =>
+            services.AddMvc()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    options.JsonSerializerOptions.IgnoreNullValues = true;
+                });
+
+            services.AddMvcCore(options =>
             {
                 //Work around to enable swagger with Odata
                 foreach (var outputFormatter in options.OutputFormatters.OfType<ODataOutputFormatter>().Where(_ => _.SupportedMediaTypes.Count == 0))
-                {
                     outputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/prs.odatatestxx-odata"));
-                }
+
                 foreach (var inputFormatter in options.InputFormatters.OfType<ODataInputFormatter>().Where(_ => _.SupportedMediaTypes.Count == 0))
-                {
                     inputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/prs.odatatestxx-odata"));
-                }
-            })
-                .AddControllersAsServices()
-                .AddJsonOptions(options => {
-                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                    options.JsonSerializerOptions.IgnoreNullValues = true;
             });
 
             services.AddSwaggerGen(c =>

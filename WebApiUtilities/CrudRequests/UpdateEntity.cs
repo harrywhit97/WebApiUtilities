@@ -9,14 +9,20 @@ using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.CrudRequests
 {
-    public interface IUpdateCommand<T, TId> :  IRequest<T>, IDto<T, TId>
+    public interface IUpdateCommand<T, TId> :  IRequest<T>, IHasId<TId>
         where T : Entity<TId>
     {
     }
 
+    public abstract class UpdateCommand<T, TId> : IUpdateCommand<T, TId>
+        where T : Entity<TId>
+    {
+        public TId Id { get; set; }
+    }
+
     public class UpdateEntityHandler<T, TId, TUpdateCommand, TDbContext> : IRequestHandler<TUpdateCommand, T>
         where T : Entity<TId>
-        where TUpdateCommand : class, IUpdateCommand<T, TId>
+        where TUpdateCommand : class, IUpdateCommand<T, TId>, IHasId<TId>
         where TDbContext : DbContext
     {
         readonly protected TDbContext dbContext;

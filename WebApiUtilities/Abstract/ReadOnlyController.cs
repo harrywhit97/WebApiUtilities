@@ -25,7 +25,7 @@ namespace WebApiUtilities.Abstract
         [HttpGet]
         [EnableQuery]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IQueryable<T> Get()
+        public virtual IQueryable<T> Get()
         {
             Logger.LogDebug("Recieved Get request");
             return Mediator.Send(new GetEntities<T, TId>()).Result;
@@ -35,7 +35,7 @@ namespace WebApiUtilities.Abstract
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetById(TId Id)
+        public virtual async Task<ActionResult<T>> GetById(TId Id)
         {
             Logger.LogDebug("Recieved GetById request");
 
@@ -45,12 +45,12 @@ namespace WebApiUtilities.Abstract
             }
             catch (NotFoundException e)
             {
-                Logger.LogError(e, "There was an error processing a Get request");
+                Logger.LogError(e, "There was an error processing a GetById request");
                 return NotFound(e.Message);
             }
             catch (Exception e)
             {
-                Logger.LogError(e, "There was an error processing a Get request");
+                Logger.LogError(e, "There was an error processing a GetById request");
                 return BadRequest(e.Message);
             }
         }

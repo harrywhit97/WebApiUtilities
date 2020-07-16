@@ -8,14 +8,18 @@ using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.CrudRequests
 {
-    public interface ICreateCommand<T, TId> : IRequest<T>, IDto<T, TId>
+    public interface ICreateCommand<T, TId> : IRequest<T>, IMapFrom<T>
+        where T : Entity<TId>
+    { }
+
+    public class CreateCommand<T, TId> : ICreateCommand<T, TId> 
         where T : Entity<TId>
     {
     }
 
     public class CreateEntityHandler<T, TId, TCreateCommand, TDbContext> : IRequestHandler<TCreateCommand, T>
         where T : Entity<TId>
-        where TCreateCommand : class, ICreateCommand<T, TId>
+        where TCreateCommand : class, ICreateCommand<T, TId>, IMapFrom<T>
         where TDbContext : DbContext
     {
         readonly protected TDbContext Context;

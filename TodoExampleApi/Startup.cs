@@ -47,28 +47,28 @@ namespace TodoExampleApi
             
             app.UseAuthorization();
 
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.EnableDependencyInjection();
+                endpoints.MapControllers();
+                endpoints.Select().Filter().OrderBy().Count().MaxTop(10).Expand();
+                endpoints.MapODataRoute("query", "query", GetEdmModel());
+            });
+
             app.UseSwagger();
 
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.EnableDependencyInjection();
-                endpoints.MapControllers();
-                endpoints.Select().Filter().OrderBy().Count().MaxTop(10).Expand();
-                endpoints.MapODataRoute("api", "api", GetEdmModel());
-            });
-
-            static IEdmModel GetEdmModel()
-            {
-                var odataBuilder = new ODataConventionModelBuilder();
-                odataBuilder.EntitySet<TodoItem>(nameof(TodoItem));
-                odataBuilder.EntitySet<TodoList>(nameof(TodoList));
-                return odataBuilder.GetEdmModel();
-            }
         }
+        IEdmModel GetEdmModel()
+        {
+            var odataBuilder = new ODataConventionModelBuilder();
+            odataBuilder.EntitySet<TodoItem>(nameof(TodoItem));
+            odataBuilder.EntitySet<TodoList>(nameof(TodoList));
+            return odataBuilder.GetEdmModel();
+        }
+
     }
 }
