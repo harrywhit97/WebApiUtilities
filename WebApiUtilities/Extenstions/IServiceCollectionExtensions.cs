@@ -4,13 +4,16 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using AutoMapper;
+using AutoMapper.Internal;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using WebApiUtilities.Abstract;
 using WebApiUtilities.Concrete;
 using WebApiUtilities.CrudRequests;
 using WebApiUtilities.Interfaces;
@@ -62,6 +65,10 @@ namespace WebApiUtilities.Extenstions
 
             RegisterValidators(services);
             RegisterCrudActionsForRecords(services);
+            RegisterCommandHandlers(services, typeof(ICreateCommand<,>), typeof(CreateEntityHandler<,,,>));
+            RegisterCommandHandlers(services, typeof(IUpdateCommand<,>), typeof(UpdateEntityHandler<,,,>));
+            RegisterCommandHandlers(services, typeof(IDeleteEntity<,>), typeof(DeleteEntityHandler<,,>));
+
         }
 
         static void RegisterCrudActionsForRecords(IServiceCollection services)
@@ -78,13 +85,63 @@ namespace WebApiUtilities.Extenstions
             }
         }
 
+        static void RegisterDeleteCommand(Type entity, Type id, Type dbContext, IServiceCollection services)
+        {
+            var iRequestHandler = typeof(IRequestHandler<,>);
+            var emptyDeleteRequest = typeof(DeleteEntity<,>);
+            var deleteRequest = emptyDeleteRequest.MakeGenericType(entity, id);
+            var serviceType = iRequestHandler.MakeGenericType(deleteRequest, typeof(bool));
+            var emptyDeleteHandler = typeof(DeleteEntityHandler<,,>); 
+            var handler = emptyDeleteHandler.MakeGenericType(entity, id, dbContext);
+            services.AddTransient(serviceType, handler);
+        }
+
+        static void RegisterCommandHandlers(IServiceCollection services, Type commandType, Type emptycommandHandler)
+        {
+            var assembly = Assembly.GetEntryAssembly();
+
+            var commands = ExtractTypesFromAssembly(assembly, commandType);
+
+            var dbContext = assembly.DefinedTypes.Where(t => typeof(DbContext).IsAssignableFrom(t))
+                                        .FirstOrDefault();
+
+            foreach (var command in commands)
+            {
+                var iCommandGenericArguments = command.GetInterfaces()
+                                                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == commandType)
+                                                .FirstOrDefault()
+                                                .GetGenericArguments();
+
+                var entityType = iCommandGenericArguments
+                        .Where(x => x.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntity<>)))
+                        .FirstOrDefault();
+
+                var idType = GetIdTypeOfEntity(entityType);
+
+                var iRequestHandler = typeof(IRequestHandler<,>);
+                var serviceType = iRequestHandler.MakeGenericType(command, entityType);
+                var handler = emptycommandHandler.MakeGenericType(entityType, idType, command, dbContext );
+
+                services.AddTransient(serviceType, handler);
+                RegisterDeleteCommand(entityType, idType, dbContext, services);
+            }
+        }
+
+        static Type GetIdTypeOfEntity(Type entityType)
+        {
+            return entityType.GetInterfaces()
+                        .FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEntity<>))
+                        .GetGenericArguments()
+                        .FirstOrDefault();
+        }
+
         static void RegisterValidators(IServiceCollection services)
         {
             var assembly = Assembly.GetEntryAssembly();
 
-            List<Type> validators = ExtractTypesFromAssembly(assembly, typeof(IValidator<>));
-            List<Type> creates = ExtractTypesFromAssembly(assembly, typeof(ICreateCommand<,>));
-            List<Type> updates = ExtractTypesFromAssembly(assembly, typeof(IUpdateCommand<,>));
+            var creates = ExtractTypesFromAssembly(assembly, typeof(ICreateCommand<,>));
+            var updates = ExtractTypesFromAssembly(assembly, typeof(IUpdateCommand<,>));
+            var validators = ExtractTypesFromAssembly(assembly, typeof(IValidator<>));
 
             foreach (var validator in validators)
             {

@@ -1,9 +1,10 @@
 ﻿using FluentValidation;
+using WebApiUtilities.Abstract;
 using WebApiUtilities.Interfaces;
 
 namespace TodoExampleApi.Features.TodoLists
 {
-    public class TodoListValidator<TDto> : AbstractValidator<TDto>, IValidate<TodoListDto>
+    public class TodoListValidator<TDto> : DtoValidator<TDto, TodoListDto>
         where TDto : TodoListDto
     {
         public TodoListValidator()

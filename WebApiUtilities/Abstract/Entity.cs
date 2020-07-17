@@ -2,7 +2,7 @@
 
 namespace WebApiUtilities.Abstract
 {
-    public abstract class Entity<TId> : IHasId<TId>
+    public abstract class Entity<TId> : IEntity<TId>
     {
         public TId Id { get; set; }
     }

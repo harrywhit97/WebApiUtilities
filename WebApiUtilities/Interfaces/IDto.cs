@@ -2,7 +2,9 @@
 
 namespace WebApiUtilities.Interfaces
 {
-    public interface IDto<T, TId> : IHasId<TId>, IMapFrom<T>
+    public interface IDto { }
+
+    public interface IDto<T, TId> : IDto, IHasId<TId>, IMapFrom<T>
         where T : Entity<TId>
     {
     }
