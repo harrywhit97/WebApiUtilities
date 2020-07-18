@@ -7,6 +7,8 @@ namespace WebApiUtilities.Exceptions
 {
     public class ValidationException : Exception
     {
+        public IDictionary<string, string[]> Errors { get; }
+        
         public ValidationException()
             : base("One or more validation failures have occurred.")
         {
@@ -28,6 +30,5 @@ namespace WebApiUtilities.Exceptions
             }
         }
 
-        public IDictionary<string, string[]> Errors { get; }
     }
 }
