@@ -4,7 +4,7 @@ using WebApiUtilities.Abstract;
 
 namespace TodoExampleApi.Features.TodoLists
 {
-    public class TodoListRecord : ChangeableRecord<TodoList, long, TodoListContext, CreateTodoList, UpdateTodoList>
+    public class TodoListRecord : ChangeableRecord<TodoList, long, TodoListContext>
     {
     }
 }

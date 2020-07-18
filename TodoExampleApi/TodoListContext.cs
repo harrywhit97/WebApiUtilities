@@ -9,12 +9,10 @@ namespace TodoExampleApi
     {
         public DbSet<TodoItem> Todos { get; set; }
         public DbSet<TodoList> TodoLists { get; set; }
-        public IClock Clock { get; set; }
 
         public TodoListContext(DbContextOptions<TodoListContext> options, IClock clock)
-            :base(options)
+            :base(options, clock)
         {
-            Clock = clock;
         }
 
         protected override void OnModelCreating(ModelBuilder modelbuilder)
