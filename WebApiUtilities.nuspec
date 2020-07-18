@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+  <metadata>
+    <id>WebApiUtilities</id>
+    <version>$version$</version>
+    <authors>Harry Whittaker</authors>
+    <owners>Harry Whittaker</owners>
+    <projectUrl>https://github.com/harrywhit97/WebApiUtilities</projectUrl>
+	<title>Web Api Utilities</title>
+    <description>Framework to enable fast development of ASP.Net Core 3.1 Web APIs utilising Swagger, OData</description>
+  </metadata>
+  <files>
+    <file src="src/WebApiUtilities/bin/Release/netcoreapp3.1/**"  target="lib" />
+  </files>
+</package>
