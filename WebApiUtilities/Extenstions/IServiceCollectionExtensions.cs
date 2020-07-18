@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using AutoMapper;
-using AutoMapper.Internal;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNet.OData.Extensions;
@@ -13,7 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
-using WebApiUtilities.Abstract;
 using WebApiUtilities.Concrete;
 using WebApiUtilities.CrudRequests;
 using WebApiUtilities.Interfaces;
@@ -23,6 +21,8 @@ namespace WebApiUtilities.Extenstions
 {
     public static class IServiceCollectionExtensions
     {
+        static readonly Type iRequestHandler = typeof(IRequestHandler<,>);
+        
         public static void AddWebApiServices(this IServiceCollection services, int apiVersion)
         {
             services.AddOData();
@@ -63,71 +63,83 @@ namespace WebApiUtilities.Extenstions
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
 
             RegisterValidators(services);
-            RegisterCrudActionsForRecords(services);
+            RegisterReadActions(services);
             RegisterCUDHandlers(services);
         }
 
-        static void RegisterCrudActionsForRecords(IServiceCollection services)
+        static void RegisterReadActions(IServiceCollection services)
         {
             var assembly = Assembly.GetEntryAssembly();
 
-            var types = assembly.GetExportedTypes()
-                .Where(x => x.GetInterfaces().Any(i => i.Name == nameof(IRecord)));
+            var entities = assembly.GetExportedTypes()
+                    .Where(x => x.GetInterfaces()
+                        .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntity<>)));
 
-            foreach (var type in types)
+            var dbContext = assembly.DefinedTypes.Where(t => typeof(DbContext).IsAssignableFrom(t))
+                                        .FirstOrDefault();
+
+            foreach (var entity in entities)
             {
-                var instance = Activator.CreateInstance(type) as IRecord;
-                instance.RegisterServices(services);
+                var id = GetIdTypeOfEntity(entity);
+
+                var getEntitiesRequest = BaseRequests.GetEntitiesRequest.MakeGenericType(entity, id);
+
+                var getEntitiesResponse = typeof(IQueryable<>).MakeGenericType(entity);
+
+                Register(services, BaseRequests.GetEntitiesRequest, getEntitiesResponse, 
+                    BaseRequests.GetEntitiesHandler, entity, id, dbContext);
+
+                Register(services, BaseRequests.GetEntityByIdRequest, entity,
+                    BaseRequests.GetEntityByIdHandler, entity, id, dbContext);
             }
         }
 
-        static void RegisterDeleteCommand(Type entity, Type id, Type dbContext, IServiceCollection services)
+        static void Register(IServiceCollection services, Type request, Type response, Type handler, Type entity, Type id, Type dbContext)
         {
-            var iRequestHandler = typeof(IRequestHandler<,>);
-            var emptyDeleteRequest = typeof(DeleteEntity<,>);
-            var deleteRequest = emptyDeleteRequest.MakeGenericType(entity, id);
-            var serviceType = iRequestHandler.MakeGenericType(deleteRequest, typeof(bool));
-            var emptyDeleteHandler = typeof(DeleteEntityHandler<,,>);
-            var handler = emptyDeleteHandler.MakeGenericType(entity, id, dbContext);
-            services.AddTransient(serviceType, handler);
+            var requestType = request.MakeGenericType(entity, id);
+            var serviceType = iRequestHandler.MakeGenericType(requestType, response);
+            var handlerType = handler.MakeGenericType(entity, id, requestType, dbContext);
+            services.AddTransient(serviceType, handlerType);
+        }
+
+        static void RegisterInstantiatedRequest(IServiceCollection services, Type request, Type response, Type handler, Type entity, Type id, Type dbContext)
+        {
+            var serviceType = iRequestHandler.MakeGenericType(request, response);
+            var handlerType = handler.MakeGenericType(entity, id, request, dbContext);
+            services.AddTransient(serviceType, handlerType);
         }
 
         static void RegisterCUDHandlers(IServiceCollection services)
         {
             var assembly = Assembly.GetEntryAssembly();
 
-            var createCommands = ExtractTypesFromAssembly(assembly, Commands.CreateCommand);
-            var updateCommands = ExtractTypesFromAssembly(assembly, Commands.UpdateCommand);
+            var createCommands = ExtractTypesFromAssembly(assembly, BaseRequests.CreateCommand);
+            var updateCommands = ExtractTypesFromAssembly(assembly, BaseRequests.UpdateCommand);
 
             var dbContext = assembly.DefinedTypes.Where(t => typeof(DbContext).IsAssignableFrom(t))
                                         .FirstOrDefault();
 
             foreach (var createCommand in createCommands)
             {
-                var createCommandGenericArguments = GetCommandGenericArguments(createCommand, Commands.CreateCommand);
+                var createCommandGenericArguments = GetCommandGenericArguments(createCommand, BaseRequests.CreateCommand);
 
-                Type entityType = GetEnityFromGenericArguments(createCommandGenericArguments);
-                var idType = GetIdTypeOfEntity(entityType);
+                Type entity = GetEnityFromGenericArguments(createCommandGenericArguments);
+                var id = GetIdTypeOfEntity(entity);
 
-                var updateCommand = GetUpdateCommandForEntity(updateCommands, entityType);
+                var updateCommand = GetUpdateCommandForEntity(updateCommands, entity);
 
-                RegisterCUCommand(services, createCommand, Commands.CreateCommandHandler, entityType, idType, dbContext);
+                RegisterInstantiatedRequest(services, createCommand, entity, 
+                    BaseRequests.CreateHandler, entity, id, dbContext);
+
+                if (updateCommand != null)
+                    RegisterInstantiatedRequest(services, updateCommand, entity,
+                        BaseRequests.UpdateHandler, entity, id, dbContext);
                 
-                if(updateCommand != null)
-                    RegisterCUCommand(services, updateCommand, Commands.UpdateCommandHandler, entityType, idType, dbContext);
-                
-                RegisterDeleteCommand(entityType, idType, dbContext, services);
+                Register(services, BaseRequests.DeleteCommand, typeof(bool), 
+                    BaseRequests.DeleteHandler, entity, id, dbContext);
             }
         }
-
-        static void RegisterCUCommand(IServiceCollection services, Type command, Type commandHandler, Type entity, Type id, Type dbContext)
-        {
-            var iRequestHandler = typeof(IRequestHandler<,>);
-            var serviceType = iRequestHandler.MakeGenericType(command, entity);
-            var handler = commandHandler.MakeGenericType(entity, id, command, dbContext);
-            services.AddTransient(serviceType, handler);
-        }
-
+        
         static Type GetEnityFromGenericArguments(Type[] commandGenericArguments)
         {
             return commandGenericArguments
@@ -139,7 +151,7 @@ namespace WebApiUtilities.Extenstions
         {
             foreach (var update in updates)
             {
-                var args = GetCommandGenericArguments(update, Commands.UpdateCommand);
+                var args = GetCommandGenericArguments(update, BaseRequests.UpdateCommand);
                 var updateEntity = GetEnityFromGenericArguments(args);
 
                 if (updateEntity is null)
@@ -211,15 +223,21 @@ namespace WebApiUtilities.Extenstions
             services.AddTransient(serviceType, validator);
         }
 
-        static class Commands
+        static class BaseRequests
         {
             public static Type CreateCommand { get => typeof(ICreateCommand<,>); }
             public static Type UpdateCommand { get => typeof(IUpdateCommand<,>); }
-            public static Type DeleteCommand { get => typeof(IDeleteEntity<,>); }
+            public static Type DeleteCommand { get => typeof(DeleteEntity<,>); }
 
-            public static Type CreateCommandHandler { get => typeof(CreateEntityHandler<,,,>); }
-            public static Type UpdateCommandHandler { get => typeof(UpdateEntityHandler<,,,>); }
-            public static Type DeleteCommandHandler { get => typeof(DeleteEntityHandler<,,>); }
+            public static Type GetEntitiesRequest { get => typeof(GetEntities<,>); }
+            public static Type GetEntityByIdRequest { get => typeof(GetEntityById<,>); }
+
+            public static Type CreateHandler { get => typeof(CreateEntityHandler<,,,>); }
+            public static Type UpdateHandler { get => typeof(UpdateEntityHandler<,,,>); }
+            public static Type DeleteHandler { get => typeof(DeleteEntityHandler<,,,>); }
+
+            public static Type GetEntitiesHandler { get => typeof(GetEntitiesHandler<,,,>); }
+            public static Type GetEntityByIdHandler { get => typeof(GetEntityByIdHandler<,,,>); }
         }
     }
 }

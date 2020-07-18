@@ -22,6 +22,14 @@ namespace WebApiUtilities.PipelineBehaviours
             {
                 return await next();
             }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (BadRequestException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 var requestName = typeof(TRequest).Name;

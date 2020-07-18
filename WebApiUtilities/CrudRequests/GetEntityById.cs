@@ -18,15 +18,16 @@ namespace WebApiUtilities.CrudRequests
         public GetEntityById(TId id) => Id = id;
     }
 
-    public class GetEntityByIdHandler<T, TId, TDbContext> : AbstractRequestHandler<GetEntityById<T, TId>, T, TDbContext>
+    public class GetEntityByIdHandler<T, TId, TGetEntityByIdRequest, TDbContext> : AbstractRequestHandler<TGetEntityByIdRequest, T, TDbContext>
         where T : Entity<TId>
         where TDbContext : DbContext
+        where TGetEntityByIdRequest : IGetEntityById<T, TId>
     {
         public GetEntityByIdHandler(TDbContext dbContext)
             : base(dbContext)
         { }
 
-        public override async Task<T> Handle(GetEntityById<T, TId> request, CancellationToken cancellationToken)
+        public override async Task<T> Handle(TGetEntityByIdRequest request, CancellationToken cancellationToken)
         {
             return await dbContext.Set<T>().FindAsync(request.Id)
                 ?? throw new NotFoundException(typeof(T).Name, request.Id);

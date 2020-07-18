@@ -15,16 +15,16 @@ namespace WebApiUtilities.CrudRequests
         where T : Entity<TId>
     { }
 
-    public class GetEntitiesHandler<T, TId, TRequest, TDbContext> : AbstractRequestHandler<TRequest, IQueryable<T>, TDbContext>
+    public class GetEntitiesHandler<T, TId, TGetEntitiesRequest, TDbContext> : AbstractRequestHandler<TGetEntitiesRequest, IQueryable<T>, TDbContext>
         where T : Entity<TId>
         where TDbContext : DbContext
-        where TRequest : IRequest<IQueryable<T>>
+        where TGetEntitiesRequest : IRequest<IQueryable<T>>
     {
         public GetEntitiesHandler(TDbContext dbContext) 
             : base(dbContext)
         { }
 
-        public override Task<IQueryable<T>> Handle(TRequest request, CancellationToken cancellationToken)
+        public override Task<IQueryable<T>> Handle(TGetEntitiesRequest request, CancellationToken cancellationToken)
         {
             return Task.FromResult(dbContext.Set<T>().AsQueryable());
         }

@@ -18,15 +18,16 @@ namespace WebApiUtilities.CrudRequests
         public DeleteEntity(TId id) => Id = id;
     }
 
-    public class DeleteEntityHandler<T, TId, TDbContext> : AbstractRequestHandler<IDeleteEntity<T, TId>, bool, TDbContext>
+    public class DeleteEntityHandler<T, TId, TDeleteCommand, TDbContext> : AbstractRequestHandler<TDeleteCommand, bool, TDbContext>
         where T : Entity<TId>
         where TDbContext : DbContext
+        where TDeleteCommand : IDeleteEntity<T, TId>
     {
         public DeleteEntityHandler(TDbContext dbContext)
-            : base(dbContext) 
+            : base(dbContext)
         { }
 
-        public override async Task<bool> Handle(IDeleteEntity<T, TId> request, CancellationToken cancellationToken)
+        public override async Task<bool> Handle(TDeleteCommand request, CancellationToken cancellationToken)
         {
             var entity = await dbContext.Set<T>().FindAsync(request.Id)
                 ?? throw new NotFoundException(typeof(T).Name, request.Id);

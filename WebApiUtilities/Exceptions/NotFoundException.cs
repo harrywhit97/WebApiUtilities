@@ -20,7 +20,7 @@ namespace WebApiUtilities.Exceptions
         }
 
         public NotFoundException(string name, object key)
-            : base($"Entity \"{name}\" ({key}) was not found.")
+            : base($"Entity \"{name}\" was not found with id: {key}")
         {
         }
     }
