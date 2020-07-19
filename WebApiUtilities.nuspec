@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>WebApiUtilities</id>
+    <version>$version$</version>
+    <authors>Harry Whittaker</authors>
+    <owners>Harry Whittaker</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <description>Framework to enable the fast development of ASP.Net Core 3.1 Web APIs utilising Swagger and OData.</description>
+    <dependencies>
+      <group targetFramework=".NETCoreApp3.1">
+        <dependency id="AutoMapper" version="10.0.0" exclude="Build,Analyzers" />
+        <dependency id="AutoMapper.Extensions.Microsoft.DependencyInjection" version="7.0.0" exclude="Build,Analyzers" />
+        <dependency id="FluentValidation" version="9.0.1" exclude="Build,Analyzers" />
+        <dependency id="FluentValidation.AspNetCore" version="9.0.1" exclude="Build,Analyzers" />
+        <dependency id="MediatR" version="8.0.2" exclude="Build,Analyzers" />
+        <dependency id="MediatR.Extensions.Microsoft.DependencyInjection" version="8.0.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Mvc.Core" version="2.2.5" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Mvc.NewtonsoftJson" version="3.1.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.OData" version="7.4.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.OData.Versioning" version="4.1.1" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.EntityFrameworkCore" version="5.0.0-preview.6.20312.4" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.EntityFrameworkCore.InMemory" version="5.0.0-preview.6.20312.4" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.EntityFrameworkCore.SqlServer" version="5.0.0-preview.6.20312.4" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="5.0.0-preview.6.20305.6" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.OData.Edm" version="7.7.0" exclude="Build,Analyzers" />
+        <dependency id="Newtonsoft.Json" version="12.0.3" exclude="Build,Analyzers" />
+        <dependency id="Swashbuckle.AspNetCore" version="5.5.1" exclude="Build,Analyzers" />
+        <dependency id="System.Linq" version="4.3.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="src/WebApiUtilities/bin/Release/netcoreapp3.1/WebApiUtilities.dll"  target="lib" />
+  </files>
+</package>
