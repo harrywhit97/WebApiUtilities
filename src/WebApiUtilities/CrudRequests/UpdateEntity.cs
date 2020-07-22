@@ -14,14 +14,14 @@ namespace WebApiUtilities.CrudRequests
     {
     }
 
-    public class UpdateEntityHandler<T, TId, TUpdateCommand, TDbContext> : AbstractRequestHandler<TUpdateCommand, T, TDbContext>
+    public class UpdateCommandHandler<T, TId, TUpdateCommand, TDbContext> : AbstractRequestHandler<TUpdateCommand, T, TDbContext>
         where T : Entity<TId>
         where TUpdateCommand : class, IUpdateCommand<T, TId>, IHasId<TId>
         where TDbContext : DbContext
     {
         readonly protected IMapper mapper;
 
-        public UpdateEntityHandler(TDbContext dbContext, IMapper mapper)
+        public UpdateCommandHandler(TDbContext dbContext, IMapper mapper)
             : base(dbContext) => this.mapper = mapper;
 
         public override async Task<T> Handle(TUpdateCommand command, CancellationToken cancellationToken)

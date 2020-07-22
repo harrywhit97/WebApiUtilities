@@ -18,6 +18,7 @@ namespace TodoExampleApi
     public class Startup
     {
         const int ApiVersion = 1;
+        const int MaxTop = 10;
 
         public Startup(IConfiguration configuration)
         {
@@ -55,7 +56,7 @@ namespace TodoExampleApi
             {
                 endpoints.EnableDependencyInjection();
                 endpoints.MapControllers();
-                endpoints.AddOdata("query", GetEdmModel(), 10);
+                endpoints.AddOdata("query", GetEdmModel(), MaxTop);
             });
 
             app.AddSwagger(ApiVersion);

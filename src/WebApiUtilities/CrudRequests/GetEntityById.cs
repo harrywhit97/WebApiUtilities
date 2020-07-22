@@ -12,9 +12,10 @@ namespace WebApiUtilities.CrudRequests
         where T : Entity<TId>
     { }
 
-    public class GetEntityById<T, TId> : Entity<TId>, IGetEntityById<T, TId>
+    public class GetEntityById<T, TId> : IGetEntityById<T, TId>
         where T : Entity<TId>
     {
+        public TId Id { get; set; }
         public GetEntityById(TId id) => Id = id;
     }
 

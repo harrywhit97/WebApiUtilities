@@ -71,9 +71,7 @@ namespace WebApiUtilities.Extenstions
         {
             var assembly = Assembly.GetEntryAssembly();
 
-            var entities = assembly.GetExportedTypes()
-                    .Where(x => x.GetInterfaces()
-                        .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntity<>)));
+            var entities = ExtensionHelpers.GetEntities(assembly);
 
             var dbContext = assembly.DefinedTypes.Where(t => typeof(DbContext).IsAssignableFrom(t))
                                         .FirstOrDefault();
@@ -113,8 +111,8 @@ namespace WebApiUtilities.Extenstions
         {
             var assembly = Assembly.GetEntryAssembly();
 
-            var createCommands = ExtractTypesFromAssembly(assembly, BaseRequests.CreateCommand);
-            var updateCommands = ExtractTypesFromAssembly(assembly, BaseRequests.UpdateCommand);
+            var createCommands = ExtensionHelpers.ExtractTypesFromAssembly(assembly, BaseRequests.CreateCommand);
+            var updateCommands = ExtensionHelpers.ExtractTypesFromAssembly(assembly, BaseRequests.UpdateCommand);
 
             var dbContext = assembly.DefinedTypes.Where(t => typeof(DbContext).IsAssignableFrom(t))
                                         .FirstOrDefault();
@@ -147,7 +145,7 @@ namespace WebApiUtilities.Extenstions
                     .FirstOrDefault();
         }
 
-        static Type GetUpdateCommandForEntity(List<Type> updates, Type entity)
+        static Type GetUpdateCommandForEntity(IEnumerable<Type> updates, Type entity)
         {
             foreach (var update in updates)
             {
@@ -183,9 +181,9 @@ namespace WebApiUtilities.Extenstions
         {
             var assembly = Assembly.GetEntryAssembly();
 
-            var creates = ExtractTypesFromAssembly(assembly, typeof(ICreateCommand<,>));
-            var updates = ExtractTypesFromAssembly(assembly, typeof(IUpdateCommand<,>));
-            var validators = ExtractTypesFromAssembly(assembly, typeof(IValidator<>));
+            var creates = ExtensionHelpers.ExtractTypesFromAssembly(assembly, typeof(ICreateCommand<,>));
+            var updates = ExtensionHelpers.ExtractTypesFromAssembly(assembly, typeof(IUpdateCommand<,>));
+            var validators = ExtensionHelpers.ExtractTypesFromAssembly(assembly, typeof(IValidator<>));
 
             foreach (var validator in validators)
             {
@@ -197,17 +195,9 @@ namespace WebApiUtilities.Extenstions
                 MakeAndAddRequestValidatorService(creates, dtoType, validator, services);
                 MakeAndAddRequestValidatorService(updates, dtoType, validator, services);
             }
-        }
+        }        
 
-        static List<Type> ExtractTypesFromAssembly(Assembly assembly, Type genericInterface)
-        {
-            return assembly.GetExportedTypes()
-                            .Where(t => t.GetInterfaces().Any(i =>
-                                i.IsGenericType && i.GetGenericTypeDefinition() == genericInterface))
-                            .ToList();
-        }
-
-        static void MakeAndAddRequestValidatorService(List<Type> requests, Type dto, Type validator, IServiceCollection services)
+        static void MakeAndAddRequestValidatorService(IEnumerable<Type> requests, Type dto, Type validator, IServiceCollection services)
         {
             var request = requests.Where(x => x.BaseType?.Equals(dto) ?? false)
                     .FirstOrDefault();
@@ -227,13 +217,13 @@ namespace WebApiUtilities.Extenstions
         {
             public static Type CreateCommand { get => typeof(ICreateCommand<,>); }
             public static Type UpdateCommand { get => typeof(IUpdateCommand<,>); }
-            public static Type DeleteCommand { get => typeof(DeleteEntity<,>); }
+            public static Type DeleteCommand { get => typeof(DeleteCommand<,>); }
 
             public static Type GetEntitiesRequest { get => typeof(GetEntities<,>); }
             public static Type GetEntityByIdRequest { get => typeof(GetEntityById<,>); }
 
-            public static Type CreateHandler { get => typeof(CreateEntityHandler<,,,>); }
-            public static Type UpdateHandler { get => typeof(UpdateEntityHandler<,,,>); }
+            public static Type CreateHandler { get => typeof(CreateCommandHandler<,,,>); }
+            public static Type UpdateHandler { get => typeof(UpdateCommandHandler<,,,>); }
             public static Type DeleteHandler { get => typeof(DeleteEntityHandler<,,,>); }
 
             public static Type GetEntitiesHandler { get => typeof(GetEntitiesHandler<,,,>); }

@@ -72,7 +72,7 @@ namespace WebApiUtilities.Abstract
 
             try
             {
-                await Mediator.Send(new DeleteEntity<T, TId>(Id), new CancellationToken());
+                await Mediator.Send(new DeleteCommand<T, TId>(Id), new CancellationToken());
                 return Ok();
             }
             catch (NotFoundException e)

@@ -12,14 +12,14 @@ namespace WebApiUtilities.CrudRequests
         where T : Entity<TId>
     { }
 
-    public class CreateEntityHandler<T, TId, TCreateCommand, TDbContext> : AbstractRequestHandler<TCreateCommand, T, TDbContext>
+    public class CreateCommandHandler<T, TId, TCreateCommand, TDbContext> : AbstractRequestHandler<TCreateCommand, T, TDbContext>
         where T : Entity<TId>
         where TCreateCommand : class, ICreateCommand<T, TId>, IMapFrom<T>
         where TDbContext : DbContext
     {
         readonly protected IMapper mapper;
 
-        public CreateEntityHandler(TDbContext dbContext, IMapper mapper)
+        public CreateCommandHandler(TDbContext dbContext, IMapper mapper)
             : base(dbContext) => this.mapper = mapper;
 
         public override async Task<T> Handle(TCreateCommand command, CancellationToken cancellationToken)
