@@ -23,7 +23,7 @@ namespace WebApiUtilities.Extenstions
     {
         static readonly Type iRequestHandler = typeof(IRequestHandler<,>);
         
-        public static void AddWebApiServices(this IServiceCollection services, int apiVersion)
+        public static void AddWebApiServices(this IServiceCollection services, string apiTitle, int apiVersion)
         {
             services.AddOData();
             services.AddControllers();
@@ -47,7 +47,7 @@ namespace WebApiUtilities.Extenstions
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc($"v{apiVersion}", new OpenApiInfo { Title = "My API", Version = $"v{apiVersion}" });
+                c.SwaggerDoc($"v{apiVersion}", new OpenApiInfo { Title = apiTitle, Version = $"v{apiVersion}" });
             });
 
             services.AddLogging();

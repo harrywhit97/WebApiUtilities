@@ -1,7 +1,4 @@
-using System;
-using System.Linq;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -10,13 +7,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OData.Edm;
 using TodoExampleApi.Models;
-using WebApiUtilities.Concrete;
 using WebApiUtilities.Extenstions;
 
 namespace TodoExampleApi
 {
     public class Startup
     {
+        const string ApiTitle = "TodoApi";
         const int ApiVersion = 1;
         const int MaxTop = 10;
 
@@ -35,7 +32,7 @@ namespace TodoExampleApi
             services.AddDbContext<TodoListContext>(options =>
                 options.UseInMemoryDatabase("Todo"));
 
-            services.AddWebApiServices(ApiVersion);
+            services.AddWebApiServices(ApiTitle, ApiVersion);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,15 +49,9 @@ namespace TodoExampleApi
             
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.EnableDependencyInjection();
-                endpoints.MapControllers();
-                endpoints.AddOdata("query", GetEdmModel(), MaxTop);
-            });
-
-            app.AddSwagger(ApiVersion);
+            app.AddWebApiUtilities(GetEdmModel(), MaxTop, ApiVersion);
         }
+
         IEdmModel GetEdmModel()
         {
             var odataBuilder = new ODataConventionModelBuilder();
