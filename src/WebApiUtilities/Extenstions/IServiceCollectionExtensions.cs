@@ -23,7 +23,7 @@ namespace WebApiUtilities.Extenstions
     {
         static readonly Type iRequestHandler = typeof(IRequestHandler<,>);
         
-        public static void AddWebApiServices(this IServiceCollection services, string apiTitle, int apiVersion)
+        public static void AddWebApiServices(this IServiceCollection services, string apiTitle, int apiVersion = 1)
         {
             services.AddOData();
             services.AddControllers();
