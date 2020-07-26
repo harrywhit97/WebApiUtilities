@@ -16,10 +16,10 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.301
+        dotnet-version: 3.1.101
     - name: Install dependencies
-      run: dotnet restore
-    - name: Build src/WebApiUtilities.sln
-      run: dotnet build src/WebApiUtilities.sln --configuration Release --no-restore
+      run: dotnet restore src/WebApiUtilities.sln
+    - name: Build
+      run: dotnet build  src/WebApiUtilities.sln --configuration Release --no-restore
     - name: Test
-      run: dotnet test src/WebApiUtilities.sln --no-restore --verbosity normal
+      run: dotnet test  src/WebApiUtilities.sln --no-restore --verbosity normal
