@@ -15,10 +15,9 @@ namespace WebApiUtilities.Extenstions
             });
         }
 
-        public static void AddWebApiUtilities(this IApplicationBuilder app, IEdmModel edmModel, int maxTop, int apiVersion)
+        public static void AddWebApiUtilities(this IApplicationBuilder app, IEdmModel edmModel, int maxTop = 10, int apiVersion = 1)
         {
             app.UseEndpoints(endpoints => endpoints.AddOdata(edmModel, maxTop));
-
             app.AddSwagger(apiVersion);
         }
     }

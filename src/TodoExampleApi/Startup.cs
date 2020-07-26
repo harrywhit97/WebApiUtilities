@@ -14,8 +14,6 @@ namespace TodoExampleApi
     public class Startup
     {
         const string ApiTitle = "TodoApi";
-        const int ApiVersion = 1;
-        const int MaxTop = 10;
 
         public Startup(IConfiguration configuration)
         {
@@ -32,7 +30,7 @@ namespace TodoExampleApi
             services.AddDbContext<TodoListContext>(options =>
                 options.UseInMemoryDatabase("Todo"));
 
-            services.AddWebApiServices(ApiTitle, ApiVersion);
+            services.AddWebApiServices(ApiTitle);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,7 +47,7 @@ namespace TodoExampleApi
             
             app.UseAuthorization();
 
-            app.AddWebApiUtilities(GetEdmModel(), MaxTop, ApiVersion);
+            app.AddWebApiUtilities(GetEdmModel());
         }
 
         IEdmModel GetEdmModel()
