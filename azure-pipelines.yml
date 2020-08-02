@@ -32,3 +32,12 @@ steps:
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+
+- task: UniversalPackages@0
+  inputs:
+    command: 'download'
+    downloadDirectory: '$(System.DefaultWorkingDirectory)'
+    feedsToUse: 'internal'
+    vstsFeed: '0757bcdf-4148-46f6-9c24-9d6d4d22e910/817b4c56-f0d6-4380-bcbc-46c7940f167c'
+    vstsFeedPackage: 'webapiutilities'
+    vstsPackageVersion: '$(version)'
