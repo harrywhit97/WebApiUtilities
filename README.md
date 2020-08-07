@@ -8,12 +8,12 @@
  1. Make a new ASP .Net Core 3.1 Web API project and install the WebApiUtilities nuget package.
  2. For each model you need to add the following classes
     1. Model which inherits `Entity<TId>` **OR** `AuditableEntity<TId>`
-    1. DTO which inherits `Dto<TModel, TId>` and contains the same properties ad TModel
-    1. DTO validator which inherits `DtoValidator<TDto, Dto>` where Dto is the DTO made previously
+    1. DTO which inherits `Dto<TModel, TId>` and contains the same properties as TModel
+    1. DTO validator which inherits `DtoValidator<TDto, Dto>` where `Dto` is the DTO made previously
     1. Model configuration which inherits `IEntityTypeConfiguration<TModel>`
-    1. **Optional:** If you want to be able to create the model via the API then a Create command which inherits the DTO made previously and `ICreateCommand<TModel, TId>`
-    1. **Optional:** If you want to be able to update (PUT) the model via the API then an Update Command which inherits the DTO made previously and `IUpdateCommand<TModel, TId`
-    1. A controller which inherits either `CrudController<TModel, TId, TCreateComman, TUpdateCommand>` **OR** `ReadOnlyController<TModel, TId>`
+    1. **Optional:** If you want to be able to create the model via the API add a create command which inherits the DTO made previously and `ICreateCommand<TModel, TId>`
+    1. **Optional:** If you want to be able to update (PUT) the model via the API add an update command which inherits the DTO made previously and `IUpdateCommand<TModel, TId`
+    1. A controller which inherits either `CrudController<TModel, TId, TCreateCommand, TUpdateCommand>` **OR** `ReadOnlyController<TModel, TId>`
  3. Make a DbContext which inherits either `AuditingDbContext` **OR** `DbContext`
  4. In the ConfigureServices method of Startup.cs configure your DbContext then add the following line.
 ```C#
@@ -39,11 +39,11 @@
  ```
  
  ## Adding endpoints
- WebAppUtilities utilises MediatR to maintain SOLID principles so it is recommended that for each new endpoint a IRequest and IRequestHandler is made and then in the controller you give the desired request to the mediatr.
+ WebAppUtilities utilises MediatR to maintain SOLID principles so it is recommended that for each new endpoint a IRequest and IRequestHandler is made and then in the controller  you give the desired request to the mediatr.
  
  To add new endpoints for a model add a new method to the CrudController/ReadOnlyController, decorate it with the desired HTTP method and send the Mediatr the request you made for the endpoint.
  
- To add non entity related endpoints make a new controller which inherits ApiController. This will give to access to the Mediatr to send your request to. 
+ To add non entity related endpoints make a new controller which inherits `ApiController`. This will give you access to the Mediatr to send your request to. 
  
  ## Endpoints
  * API endpoints are available at `/api/<TModel>/{id}`
