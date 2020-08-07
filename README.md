@@ -22,7 +22,7 @@
  5. In the Configure method of Startup.cs add the following
  
  ```C#
-	app.AddWebApiUtilities(GetEdmModel(), MaxTop, ApiVersion);
+app.AddWebApiUtilities(GetEdmModel(), MaxTop, ApiVersion);
  ```
  6. In Startup.cs add the following method
 
