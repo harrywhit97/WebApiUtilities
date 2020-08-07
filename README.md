@@ -17,7 +17,7 @@
  3. Make a DbContext which inherits either `AuditingDbContext` **OR** `DbContext`
  4. In the ConfigureServices method of Startup.cs configure your DbContext then add the following line.
 ```C#
-	services.AddWebApiServices(ApiTitle, ApiVersion);
+services.AddWebApiServices(ApiTitle, ApiVersion);
 ```
  5. In the Configure method of Startup.cs add the following
  
