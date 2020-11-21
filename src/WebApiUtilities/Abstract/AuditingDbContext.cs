@@ -6,7 +6,7 @@ using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.Abstract
 {
-    public class AuditingDbContext : DbContext
+    public class AuditingDbContext : DbContext, IAuditingDbContext
     {
         readonly IClock clock;
 
