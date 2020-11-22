@@ -1,14 +1,19 @@
-﻿using Microsoft.Extensions.Logging;
-using TodoExampleApi.Features.TodoItems.Commands;
+﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using TodoExampleApi.Models;
 using WebApiUtilities.Abstract;
+using WebApiUtilities.Interfaces;
 
 namespace TodoExampleApi.Features.TodoItems
 {
-    public class TodoItemController : CrudController<TodoItem, long, CreateTodo, UpdateTodoItem>
+    public class TodoItemController : RecordController<TodoItem, long, TodoItemDto>
     {
-        public TodoItemController(TodoListContext context, ILogger<TodoItemController> logger)
-            :base(context, logger)
+        public TodoItemController(IRecordService<TodoItem, long> service, ILogger<TodoItemController> log, IMapper mapper)
+            : base(service, log, mapper)
         {
         }
     }

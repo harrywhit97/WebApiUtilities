@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using WebApiUtilities.Abstract;
 using WebApiUtilities.Concrete;
 using WebApiUtilities.CrudRequests;
 using WebApiUtilities.Interfaces;
@@ -62,9 +63,10 @@ namespace WebApiUtilities.Extenstions
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
 
-            RegisterValidators(services);
-            RegisterReadActions(services);
-            RegisterCUDHandlers(services);
+            //RegisterValidators(services);
+            //RegisterReadActions(services);
+            //RegisterCUDHandlers(services);
+            RegisterRecords(services);
         }
 
         static void RegisterReadActions(IServiceCollection services)
@@ -89,6 +91,25 @@ namespace WebApiUtilities.Extenstions
 
                 Register(services, BaseRequests.GetEntityByIdRequest, entity,
                     BaseRequests.GetEntityByIdHandler, entity, id, dbContext);
+            }
+        }
+
+        static void RegisterRecords(IServiceCollection services)
+        {
+            var assembly = Assembly.GetEntryAssembly();
+            var entities = ExtensionHelpers.GetEntities(assembly);
+            var dbContext = assembly.DefinedTypes.Where(t => typeof(DbContext).IsAssignableFrom(t))
+                                       .FirstOrDefault();
+
+            var iRecordService = typeof(IRecordService<,>);
+            var baseRecordService = typeof(BaseRecordService<,,>);
+
+            foreach (var entity in entities)
+            {
+                var id = GetIdTypeOfEntity(entity);
+                var serviceType = iRecordService.MakeGenericType(entity, id);
+                var handlerType = baseRecordService.MakeGenericType(dbContext, entity, id);
+                services.AddTransient(serviceType, handlerType);
             }
         }
 

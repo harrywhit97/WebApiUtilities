@@ -5,6 +5,6 @@ namespace WebApiUtilities.Interfaces
 {
     public interface IAuditingDbContext
     {
-        public Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken;
+        public Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken);
     }
 }

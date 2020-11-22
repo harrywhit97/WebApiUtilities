@@ -19,14 +19,14 @@ namespace TodoExampleApi
         {
             modelbuilder.ApplyConfigurationsFromAssembly(typeof(TodoListContext).Assembly);
 
-            modelbuilder.Entity<TodoItem>()
-                .HasOne(t => t.List)
-                .WithMany(l => l.Todos);
+            //modelbuilder.Entity<TodoItem>()
+            //    .HasOne(t => t.List)
+            //    .WithMany(l => l.Todos);
             
-            modelbuilder.Entity<TodoList>()
-                .HasMany(l => l.Todos)
-                .WithOne(t => t.List)
-                .OnDelete(DeleteBehavior.Cascade);
+            //modelbuilder.Entity<TodoList>()
+            //    .HasMany(l => l.Todos)
+            //    .WithOne(t => t.List)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelbuilder);
         }
