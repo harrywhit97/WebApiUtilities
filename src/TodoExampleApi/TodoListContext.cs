@@ -11,7 +11,7 @@ namespace TodoExampleApi
         public DbSet<TodoList> TodoLists { get; set; }
 
         public TodoListContext(DbContextOptions<TodoListContext> options, IClock clock)
-            :base(options, clock)
+            : base(options, clock)
         {
         }
 
@@ -22,7 +22,7 @@ namespace TodoExampleApi
             //modelbuilder.Entity<TodoItem>()
             //    .HasOne(t => t.List)
             //    .WithMany(l => l.Todos);
-            
+
             //modelbuilder.Entity<TodoList>()
             //    .HasMany(l => l.Todos)
             //    .WithOne(t => t.List)

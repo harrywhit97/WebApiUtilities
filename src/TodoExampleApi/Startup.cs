@@ -42,7 +42,7 @@ namespace TodoExampleApi
             app.UseHttpsRedirection();
 
             app.UseRouting();
-            
+
             app.UseAuthorization();
 
             app.AddWebApiUtilities(GetEdmModel(), ApiTitle);

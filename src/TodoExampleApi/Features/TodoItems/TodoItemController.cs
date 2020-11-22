@@ -1,9 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TodoExampleApi.Models;
 using WebApiUtilities.Abstract;
 using WebApiUtilities.Interfaces;

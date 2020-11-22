@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.Extenstions
@@ -11,7 +10,7 @@ namespace WebApiUtilities.Extenstions
     {
         public static IEnumerable<Type> GetEntities(Assembly assembly)
         {
-            return ExtractTypesFromAssembly(assembly,typeof(IEntity<>));
+            return ExtractTypesFromAssembly(assembly, typeof(IEntity<>));
         }
 
         public static IEnumerable<Type> ExtractTypesFromAssembly(Assembly assembly, Type genericInterface)

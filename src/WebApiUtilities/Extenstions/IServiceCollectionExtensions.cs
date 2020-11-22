@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text.Json.Serialization;
-using AutoMapper;
+﻿using AutoMapper;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNet.OData.Extensions;
@@ -12,6 +7,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text.Json.Serialization;
 using WebApiUtilities.Abstract;
 using WebApiUtilities.Concrete;
 using WebApiUtilities.CrudRequests;
@@ -23,7 +23,7 @@ namespace WebApiUtilities.Extenstions
     public static class IServiceCollectionExtensions
     {
         static readonly Type iRequestHandler = typeof(IRequestHandler<,>);
-        
+
         public static void AddWebApiServices(this IServiceCollection services, string apiTitle, int apiVersion = 1)
         {
             services.AddOData();
@@ -86,7 +86,7 @@ namespace WebApiUtilities.Extenstions
 
                 var getEntitiesResponse = typeof(IQueryable<>).MakeGenericType(entity);
 
-                Register(services, BaseRequests.GetEntitiesRequest, getEntitiesResponse, 
+                Register(services, BaseRequests.GetEntitiesRequest, getEntitiesResponse,
                     BaseRequests.GetEntitiesHandler, entity, id, dbContext);
 
                 Register(services, BaseRequests.GetEntityByIdRequest, entity,
@@ -147,18 +147,18 @@ namespace WebApiUtilities.Extenstions
 
                 var updateCommand = GetUpdateCommandForEntity(updateCommands, entity);
 
-                RegisterInstantiatedRequest(services, createCommand, entity, 
+                RegisterInstantiatedRequest(services, createCommand, entity,
                     BaseRequests.CreateHandler, entity, id, dbContext);
 
                 if (updateCommand != null)
                     RegisterInstantiatedRequest(services, updateCommand, entity,
                         BaseRequests.UpdateHandler, entity, id, dbContext);
-                
-                Register(services, BaseRequests.DeleteCommand, typeof(bool), 
+
+                Register(services, BaseRequests.DeleteCommand, typeof(bool),
                     BaseRequests.DeleteHandler, entity, id, dbContext);
             }
         }
-        
+
         static Type GetEnityFromGenericArguments(Type[] commandGenericArguments)
         {
             return commandGenericArguments
@@ -216,7 +216,7 @@ namespace WebApiUtilities.Extenstions
                 MakeAndAddRequestValidatorService(creates, dtoType, validator, services);
                 MakeAndAddRequestValidatorService(updates, dtoType, validator, services);
             }
-        }        
+        }
 
         static void MakeAndAddRequestValidatorService(IEnumerable<Type> requests, Type dto, Type validator, IServiceCollection services)
         {

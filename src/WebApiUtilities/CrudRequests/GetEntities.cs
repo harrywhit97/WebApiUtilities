@@ -7,11 +7,11 @@ using WebApiUtilities.Abstract;
 
 namespace WebApiUtilities.CrudRequests
 {
-    public interface IGetEntities<T, TId> : IRequest<IQueryable<T>> 
+    public interface IGetEntities<T, TId> : IRequest<IQueryable<T>>
         where T : Entity<TId>
     { }
 
-    public class GetEntities<T, TId> : IGetEntities<T, TId> 
+    public class GetEntities<T, TId> : IGetEntities<T, TId>
         where T : Entity<TId>
     { }
 
@@ -20,7 +20,7 @@ namespace WebApiUtilities.CrudRequests
         where TDbContext : DbContext
         where TGetEntitiesRequest : IRequest<IQueryable<T>>
     {
-        public GetEntitiesHandler(TDbContext dbContext) 
+        public GetEntitiesHandler(TDbContext dbContext)
             : base(dbContext)
         { }
 

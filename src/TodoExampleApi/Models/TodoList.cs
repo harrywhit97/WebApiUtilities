@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using WebApiUtilities.Abstract;
-using WebApiUtilities.Interfaces;
 
 namespace TodoExampleApi.Models
 {

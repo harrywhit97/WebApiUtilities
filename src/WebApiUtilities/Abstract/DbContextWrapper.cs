@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace WebApiUtilities.Abstract
+﻿namespace WebApiUtilities.Abstract
 {
     class DbContextWrapper
     {

@@ -1,5 +1,4 @@
 ﻿using WebApiUtilities.Abstract;
-using WebApiUtilities.Interfaces;
 
 namespace TodoExampleApi.Models
 {

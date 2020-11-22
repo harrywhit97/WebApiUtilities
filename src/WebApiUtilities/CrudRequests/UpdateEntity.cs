@@ -9,7 +9,7 @@ using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.CrudRequests
 {
-    public interface IUpdateCommand<T, TId> :  IRequest<T>, IHasId<TId>
+    public interface IUpdateCommand<T, TId> : IRequest<T>, IHasId<TId>
         where T : Entity<TId>
     {
     }

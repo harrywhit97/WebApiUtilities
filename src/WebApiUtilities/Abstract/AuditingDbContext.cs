@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using WebApiUtilities.Interfaces;
@@ -11,7 +10,7 @@ namespace WebApiUtilities.Abstract
         readonly IClock clock;
 
         public AuditingDbContext(DbContextOptions options, IClock clock)
-            :base(options)
+            : base(options)
         {
             this.clock = clock;
         }
