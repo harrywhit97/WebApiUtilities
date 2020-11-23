@@ -1,3 +1,4 @@
+using IdentityServer4.AspNetIdentity;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
 using Microsoft.AspNet.OData.Builder;
@@ -46,8 +47,11 @@ namespace TodoExampleApi
             services.AddIdentityServer()
                     .AddDeveloperSigningCredential()        //This is for dev only scenarios when you don’t have a certificate to use.
                     .AddInMemoryApiScopes(Config.ApiScopes)
-                    .AddInMemoryClients(Config.Clients);
-
+                    .AddInMemoryClients(Config.Clients)
+                    .AddInMemoryPersistedGrants()
+                    .AddInMemoryIdentityResources(Config.IdentityResources)
+                    .AddResourceOwnerValidator<ResourceOwnerPasswordValidator<User>>()
+                    .AddInMemoryApiResources(Config.ApiResources);
 
             //services.AddIdentity<User, IdentityRole>()
             //       .AddEntityFrameworkStores<TodoListContext>()
@@ -71,13 +75,14 @@ namespace TodoExampleApi
                 options.Authority = "https://localhost:5003";
 
                 // name of the API resource
-                options.Audience = "api1";
                 options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateAudience = false
                 };
             });
+
+            services.AddTransient<SignInManager<User>>();
 
             services.AddWebApiServices(ApiTitle);
         }

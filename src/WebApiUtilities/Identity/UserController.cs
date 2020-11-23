@@ -17,7 +17,6 @@ namespace WebApiUtilities.Identity
             _userService = userService;
         }
 
-        [Authorize]
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -57,7 +56,7 @@ namespace WebApiUtilities.Identity
 
             if (response is null)
                 return BadRequest(new { message = "Username or password is incorrect" });
-            return Ok(response);
+            return Ok(response.Token);
         }
     }
 }
