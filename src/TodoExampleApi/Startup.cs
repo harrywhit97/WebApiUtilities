@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OData.Edm;
 using TodoExampleApi.Models;
 using WebApiUtilities.Extenstions;
+using WebApiUtilities.Identity;
 
 namespace TodoExampleApi
 {
@@ -32,16 +33,12 @@ namespace TodoExampleApi
             services.AddWebApiServices<TodoListContext>(ApiTitle);
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IUserService userService)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
-
-            app.UseHttpsRedirection();
-            app.UseRouting();
-            app.AddWebApiUtilities(GetEdmModel(), ApiTitle);
+            
+            app.AddWebApiUtilities(GetEdmModel(), userService, ApiTitle);
         }
 
         IEdmModel GetEdmModel()

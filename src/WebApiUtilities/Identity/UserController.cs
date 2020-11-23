@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using WebApiUtilities.Abstract;
@@ -13,14 +14,14 @@ namespace WebApiUtilities.Identity
             _userService = userService;
         }
 
+        [Authorize]
         [HttpGet]
         public IActionResult GetAll()
         {
             return Ok(_userService.GetAll());
         }
 
-        [HttpPost]
-        [Route("register")]
+        [HttpPost("register")]
         public async Task<ActionResult> Register([FromBody] UserRegistration userRegistration)
         {
             try
@@ -39,8 +40,7 @@ namespace WebApiUtilities.Identity
         [HttpPost("authenticate")]
         public async Task<IActionResult> Authenticate(AuthenticateRequest model)
         {
-            AuthenticateResponse response = null;
-
+            AuthenticateResponse response;
             try
             {
                 response = await _userService.Authenticate(model);

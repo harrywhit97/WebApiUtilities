@@ -17,6 +17,7 @@ namespace WebApiUtilities.Identity
         Task<User> Get(string id);
         IEnumerable<User> GetAll();
         Task<User> Register(UserRegistration userRegistration);
+        Task EnsureSystemUserExists();
     }
 
     public class UserService : IUserService
@@ -103,5 +104,20 @@ namespace WebApiUtilities.Identity
         public IEnumerable<User> GetAll()
             => _userManager.Users;
 
+        public async Task EnsureSystemUserExists()
+        {
+            var user = await _userManager.FindByNameAsync(_appSettings.SystemUserName);
+
+            if (user != null)
+                return;
+
+            var userRegisteration = new UserRegistration() 
+            {
+                UserName = _appSettings.SystemUserName,
+                Password = _appSettings.SystemUserPassword,
+                Email = _appSettings.SystemUserEmail
+            };
+            await Register(userRegisteration);
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.OData.Edm;
+using WebApiUtilities.Identity;
 
 namespace WebApiUtilities.Extenstions
 {
@@ -15,13 +16,16 @@ namespace WebApiUtilities.Extenstions
             });
         }
 
-        public static void AddWebApiUtilities(this IApplicationBuilder app, IEdmModel edmModel, string apiName, int maxTop = 10, int apiVersion = 1)
+        public static void AddWebApiUtilities(this IApplicationBuilder app, IEdmModel edmModel, IUserService userService,string apiName, int maxTop = 10, int apiVersion = 1)
         {
+            app.UseHttpsRedirection();
+            app.UseRouting();
             app.UseIdentityServer();
-            app.UseAuthentication();
             app.UseAuthorization();
+            app.UseAuthentication();
             app.UseEndpoints(endpoints => endpoints.AddOdata(edmModel, maxTop));
             app.AddSwagger(apiName, apiVersion);
+            userService.EnsureSystemUserExists().Wait();
         }
     }
 }

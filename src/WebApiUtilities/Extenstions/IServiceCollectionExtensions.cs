@@ -14,6 +14,7 @@ using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -42,22 +43,12 @@ namespace WebApiUtilities.Extenstions
                     options.JsonSerializerOptions.IgnoreNullValues = true;
                 });
 
-            services.AddMvcCore(options =>
-            {
-                //Work around to enable swagger with Odata
-                foreach (var outputFormatter in options.OutputFormatters.OfType<ODataOutputFormatter>().Where(_ => _.SupportedMediaTypes.Count == 0))
-                    outputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/prs.odatatestxx-odata"));
-
-                foreach (var inputFormatter in options.InputFormatters.OfType<ODataInputFormatter>().Where(_ => _.SupportedMediaTypes.Count == 0))
-                    inputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/prs.odatatestxx-odata"));
-            });
-
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc($"v{apiVersion}", new OpenApiInfo { Title = apiTitle, Version = $"v{apiVersion}" });
-            });
-
+            AddOdataFormatters(services);
             services.AddLogging();
+
+# if DEBUG
+            AddSwagger(services, apiVersion, apiTitle);
+#endif
 
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
@@ -70,8 +61,64 @@ namespace WebApiUtilities.Extenstions
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
 
             //RegisterValidators(services);
+            services.AddSingleton<AppSettings>();
+            RegisterIdentity<TDbContext>(services);
+            RegisterRecords(services);
+        }
 
+        private static void AddOdataFormatters(IServiceCollection services)
+        {
+            services.AddMvcCore(options =>
+            {
+                //Work around to enable swagger with Odata
+                foreach (var outputFormatter in options.OutputFormatters.OfType<ODataOutputFormatter>().Where(_ => _.SupportedMediaTypes.Count == 0))
+                    outputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/prs.odatatestxx-odata"));
 
+                foreach (var inputFormatter in options.InputFormatters.OfType<ODataInputFormatter>().Where(_ => _.SupportedMediaTypes.Count == 0))
+                    inputFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/prs.odatatestxx-odata"));
+            });
+        }
+
+        private static void AddSwagger(IServiceCollection services, int apiVersion, string apiTitle)
+        {
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc($"v{apiVersion}", new OpenApiInfo { Title = apiTitle, Version = $"v{apiVersion}" });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
+                      Enter 'Bearer' [space] and then your token in the text input below.
+                      \r\n\r\nExample: 'Bearer 12345abcdef'",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header,
+                        },
+                        new List<string>()
+                    }
+                });
+            });
+        }
+
+        private static void RegisterIdentity<TDbContext>(IServiceCollection services)
+            where TDbContext : IdentityDbContext<User>
+        {
             services.Configure<IdentityOptions>(options =>
             {
                 // Password settings.
@@ -90,20 +137,9 @@ namespace WebApiUtilities.Extenstions
                 // User settings.
                 options.User.AllowedUserNameCharacters =
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-                options.User.RequireUniqueEmail = false;
+                options.User.RequireUniqueEmail = true;
             });
 
-            RegisterIdentity<TDbContext>(services);
-
-            services.AddTransient<AppSettings>();
-            services.AddTransient<IUserService, UserService>();
-
-            RegisterRecords(services);
-        }
-
-        private static void RegisterIdentity<TDbContext>(IServiceCollection services)
-            where TDbContext : IdentityDbContext<User>
-        {
             var Config = IdentityConfig.Default;
 
             services.AddIdentityServer()
@@ -139,8 +175,8 @@ namespace WebApiUtilities.Extenstions
                     ValidateAudience = false
                 };
             });
-
             services.AddTransient<SignInManager<User>>();
+            services.AddTransient<IUserService, UserService>();
         }
 
         static void RegisterRecords(IServiceCollection services)

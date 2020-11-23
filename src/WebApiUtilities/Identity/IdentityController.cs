@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using WebApiUtilities.Abstract;
 
 namespace WebApiUtilities.Identity
 {
-    [Route("identity")]
-    [Authorize]
-    public class IdentityController : ControllerBase
+    public class IdentityController : ApiController
     {
         [HttpGet]
         public IActionResult Get()

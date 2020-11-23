@@ -19,7 +19,6 @@ namespace WebApiUtilities.Abstract
         private readonly ILogger _log;
         private readonly IMapper _mapper;
 
-
         public RecordController(IRecordService<T, TId> service, ILogger log, IMapper mapper)
         {
             _service = service;
@@ -36,17 +35,17 @@ namespace WebApiUtilities.Abstract
             return _service.GetAll().Result;
         }
 
-        [HttpGet("{Id}")]
+        [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public virtual async Task<ActionResult<T>> GetById(TId Id)
+        public virtual async Task<ActionResult<T>> GetById(TId id)
         {
             _log.LogDebug("Recieved GetById request");
 
             try
             {
-                return Ok(await _service.Get(Id));
+                return Ok(await _service.Get(id));
             }
             catch (NotFoundException e)
             {
@@ -104,16 +103,16 @@ namespace WebApiUtilities.Abstract
             }
         }
 
-        [HttpDelete("{Id}")]
+        [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Delete(TId Id)
+        public async Task<IActionResult> Delete(TId id)
         {
             _log.LogDebug("Recieved Delete request");
             try
             {
-                await _service.Delete(Id);
+                await _service.Delete(id);
                 return Ok();
             }
             catch (NotFoundException e)
