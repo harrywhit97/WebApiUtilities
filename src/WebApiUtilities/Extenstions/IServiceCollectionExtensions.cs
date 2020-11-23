@@ -3,8 +3,11 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using System;
@@ -14,7 +17,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using WebApiUtilities.Abstract;
 using WebApiUtilities.Concrete;
-using WebApiUtilities.CrudRequests;
+using WebApiUtilities.Identity;
 using WebApiUtilities.Interfaces;
 using WebApiUtilities.PipelineBehaviours;
 
@@ -64,34 +67,33 @@ namespace WebApiUtilities.Extenstions
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
 
             //RegisterValidators(services);
-            //RegisterReadActions(services);
-            //RegisterCUDHandlers(services);
-            RegisterRecords(services);
-        }
 
-        static void RegisterReadActions(IServiceCollection services)
-        {
-            var assembly = Assembly.GetEntryAssembly();
 
-            var entities = ExtensionHelpers.GetEntities(assembly);
-
-            var dbContext = assembly.DefinedTypes.Where(t => typeof(DbContext).IsAssignableFrom(t))
-                                        .FirstOrDefault();
-
-            foreach (var entity in entities)
+            services.Configure<IdentityOptions>(options =>
             {
-                var id = GetIdTypeOfEntity(entity);
+                // Password settings.
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 1;
 
-                var getEntitiesRequest = BaseRequests.GetEntitiesRequest.MakeGenericType(entity, id);
+                // Lockout settings.
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
 
-                var getEntitiesResponse = typeof(IQueryable<>).MakeGenericType(entity);
+                // User settings.
+                options.User.AllowedUserNameCharacters =
+                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                options.User.RequireUniqueEmail = false;
+            });
 
-                Register(services, BaseRequests.GetEntitiesRequest, getEntitiesResponse,
-                    BaseRequests.GetEntitiesHandler, entity, id, dbContext);
+            services.AddTransient<AppSettings>();
+            services.AddTransient<IUserService, UserService>();
 
-                Register(services, BaseRequests.GetEntityByIdRequest, entity,
-                    BaseRequests.GetEntityByIdHandler, entity, id, dbContext);
-            }
+            RegisterRecords(services);
         }
 
         static void RegisterRecords(IServiceCollection services)
@@ -113,83 +115,6 @@ namespace WebApiUtilities.Extenstions
             }
         }
 
-        static void Register(IServiceCollection services, Type request, Type response, Type handler, Type entity, Type id, Type dbContext)
-        {
-            var requestType = request.MakeGenericType(entity, id);
-            var serviceType = iRequestHandler.MakeGenericType(requestType, response);
-            var handlerType = handler.MakeGenericType(entity, id, requestType, dbContext);
-            services.AddTransient(serviceType, handlerType);
-        }
-
-        static void RegisterInstantiatedRequest(IServiceCollection services, Type request, Type response, Type handler, Type entity, Type id, Type dbContext)
-        {
-            var serviceType = iRequestHandler.MakeGenericType(request, response);
-            var handlerType = handler.MakeGenericType(entity, id, request, dbContext);
-            services.AddTransient(serviceType, handlerType);
-        }
-
-        static void RegisterCUDHandlers(IServiceCollection services)
-        {
-            var assembly = Assembly.GetEntryAssembly();
-
-            var createCommands = ExtensionHelpers.ExtractTypesFromAssembly(assembly, BaseRequests.CreateCommand);
-            var updateCommands = ExtensionHelpers.ExtractTypesFromAssembly(assembly, BaseRequests.UpdateCommand);
-
-            var dbContext = assembly.DefinedTypes.Where(t => typeof(DbContext).IsAssignableFrom(t))
-                                        .FirstOrDefault();
-
-            foreach (var createCommand in createCommands)
-            {
-                var createCommandGenericArguments = GetCommandGenericArguments(createCommand, BaseRequests.CreateCommand);
-
-                Type entity = GetEnityFromGenericArguments(createCommandGenericArguments);
-                var id = GetIdTypeOfEntity(entity);
-
-                var updateCommand = GetUpdateCommandForEntity(updateCommands, entity);
-
-                RegisterInstantiatedRequest(services, createCommand, entity,
-                    BaseRequests.CreateHandler, entity, id, dbContext);
-
-                if (updateCommand != null)
-                    RegisterInstantiatedRequest(services, updateCommand, entity,
-                        BaseRequests.UpdateHandler, entity, id, dbContext);
-
-                Register(services, BaseRequests.DeleteCommand, typeof(bool),
-                    BaseRequests.DeleteHandler, entity, id, dbContext);
-            }
-        }
-
-        static Type GetEnityFromGenericArguments(Type[] commandGenericArguments)
-        {
-            return commandGenericArguments
-                    .Where(x => x.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntity<>)))
-                    .FirstOrDefault();
-        }
-
-        static Type GetUpdateCommandForEntity(IEnumerable<Type> updates, Type entity)
-        {
-            foreach (var update in updates)
-            {
-                var args = GetCommandGenericArguments(update, BaseRequests.UpdateCommand);
-                var updateEntity = GetEnityFromGenericArguments(args);
-
-                if (updateEntity is null)
-                    continue;
-
-                if (entity == updateEntity)
-                    return update;
-            }
-            return null;
-        }
-
-        static Type[] GetCommandGenericArguments(Type command, Type commandType)
-        {
-            return command.GetInterfaces()
-                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == commandType)
-                .FirstOrDefault()
-                .GetGenericArguments();
-        }
-
         static Type GetIdTypeOfEntity(Type entityType)
         {
             return entityType.GetInterfaces()
@@ -202,20 +127,20 @@ namespace WebApiUtilities.Extenstions
         {
             var assembly = Assembly.GetEntryAssembly();
 
-            var creates = ExtensionHelpers.ExtractTypesFromAssembly(assembly, typeof(ICreateCommand<,>));
-            var updates = ExtensionHelpers.ExtractTypesFromAssembly(assembly, typeof(IUpdateCommand<,>));
-            var validators = ExtensionHelpers.ExtractTypesFromAssembly(assembly, typeof(IValidator<>));
+            //var creates = ExtensionHelpers.ExtractTypesFromAssembly(assembly, typeof(ICreateCommand<,>));
+            //var updates = ExtensionHelpers.ExtractTypesFromAssembly(assembly, typeof(IUpdateCommand<,>));
+            //var validators = ExtensionHelpers.ExtractTypesFromAssembly(assembly, typeof(IValidator<>));
 
-            foreach (var validator in validators)
-            {
-                var dtoType = validator.GetInterfaces()
-                    .FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IValidate<>))
-                    .GetGenericArguments()
-                    .FirstOrDefault();
+            //foreach (var validator in validators)
+            //{
+            //    var dtoType = validator.GetInterfaces()
+            //        .FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IValidate<>))
+            //        .GetGenericArguments()
+            //        .FirstOrDefault();
 
-                MakeAndAddRequestValidatorService(creates, dtoType, validator, services);
-                MakeAndAddRequestValidatorService(updates, dtoType, validator, services);
-            }
+            //    MakeAndAddRequestValidatorService(creates, dtoType, validator, services);
+            //    MakeAndAddRequestValidatorService(updates, dtoType, validator, services);
+            //}
         }
 
         static void MakeAndAddRequestValidatorService(IEnumerable<Type> requests, Type dto, Type validator, IServiceCollection services)
@@ -232,23 +157,6 @@ namespace WebApiUtilities.Extenstions
             var iValidator = typeof(IValidator<>);
             var serviceType = iValidator.MakeGenericType(request);
             services.AddTransient(serviceType, validator);
-        }
-
-        static class BaseRequests
-        {
-            public static Type CreateCommand { get => typeof(ICreateCommand<,>); }
-            public static Type UpdateCommand { get => typeof(IUpdateCommand<,>); }
-            public static Type DeleteCommand { get => typeof(DeleteCommand<,>); }
-
-            public static Type GetEntitiesRequest { get => typeof(GetEntities<,>); }
-            public static Type GetEntityByIdRequest { get => typeof(GetEntityById<,>); }
-
-            public static Type CreateHandler { get => typeof(CreateCommandHandler<,,,>); }
-            public static Type UpdateHandler { get => typeof(UpdateCommandHandler<,,,>); }
-            public static Type DeleteHandler { get => typeof(DeleteEntityHandler<,,,>); }
-
-            public static Type GetEntitiesHandler { get => typeof(GetEntitiesHandler<,,,>); }
-            public static Type GetEntityByIdHandler { get => typeof(GetEntityByIdHandler<,,,>); }
         }
     }
 }

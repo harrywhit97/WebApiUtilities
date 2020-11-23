@@ -1,6 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Interfaces;
+using IdentityServer4.EntityFramework.Options;
+using IdentityServer4.Stores;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using TodoExampleApi.Models;
 using WebApiUtilities.Abstract;
+using WebApiUtilities.Identity;
 using WebApiUtilities.Interfaces;
 
 namespace TodoExampleApi
@@ -8,9 +14,9 @@ namespace TodoExampleApi
     public class TodoListContext : AuditingDbContext
     {
         public DbSet<TodoItem> Todos { get; set; }
-        public DbSet<TodoList> TodoLists { get; set; }
+        //public DbSet<TodoList> TodoLists { get; set; }
 
-        public TodoListContext(DbContextOptions<TodoListContext> options, IClock clock)
+        public TodoListContext(DbContextOptions options, IClock clock)
             : base(options, clock)
         {
         }

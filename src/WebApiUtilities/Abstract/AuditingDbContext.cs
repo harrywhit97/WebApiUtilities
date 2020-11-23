@@ -1,11 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Options;
+using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Threading;
 using System.Threading.Tasks;
+using WebApiUtilities.Concrete;
+using WebApiUtilities.Identity;
 using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.Abstract
 {
-    public class AuditingDbContext : DbContext, IAuditingDbContext
+    public class AuditingDbContext : IdentityDbContext<User>, IAuditingDbContext
     {
         readonly IClock clock;
 

@@ -17,9 +17,11 @@ namespace WebApiUtilities.Extenstions
 
         public static void AddWebApiUtilities(this IApplicationBuilder app, IEdmModel edmModel, string apiName, int maxTop = 10, int apiVersion = 1)
         {
+            app.UseIdentityServer();
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints => endpoints.AddOdata(edmModel, maxTop));
             app.AddSwagger(apiName, apiVersion);
-            app.UseAuthentication();
         }
     }
 }

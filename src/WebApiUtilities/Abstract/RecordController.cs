@@ -5,9 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using WebApiUtilities.CrudRequests;
 using WebApiUtilities.Exceptions;
 using WebApiUtilities.Interfaces;
 
@@ -113,10 +111,9 @@ namespace WebApiUtilities.Abstract
         public async Task<IActionResult> Delete(TId Id)
         {
             _log.LogDebug("Recieved Delete request");
-
             try
             {
-                await Mediator.Send(new DeleteCommand<T, TId>(Id), new CancellationToken());
+                await _service.Delete(Id);
                 return Ok();
             }
             catch (NotFoundException e)
