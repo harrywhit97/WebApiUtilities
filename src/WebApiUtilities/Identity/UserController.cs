@@ -1,11 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using WebApiUtilities.Abstract;
-using WebApiUtilities.Concrete;
 
 namespace WebApiUtilities.Identity
 {
@@ -49,7 +45,7 @@ namespace WebApiUtilities.Identity
             {
                 response = await _userService.Authenticate(model);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw ex;
             }

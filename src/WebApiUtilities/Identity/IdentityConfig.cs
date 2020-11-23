@@ -1,8 +1,6 @@
 ﻿using IdentityServer4;
 using IdentityServer4.Models;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace WebApiUtilities.Identity
 {
@@ -19,7 +17,7 @@ namespace WebApiUtilities.Identity
         public IEnumerable<string> AllowedScopes { get; set; }
         public IEnumerable<ApiScope> ApiScopes { get; set; }
         public IEnumerable<ApiResource> ApiResources { get; set; }
-        public IEnumerable<Client> Clients{ get; set; }
+        public IEnumerable<Client> Clients { get; set; }
         public static IdentityConfig Default => GetDefault();
 
         public IEnumerable<IdentityResource> IdentityResources { get; set; }
@@ -46,7 +44,7 @@ namespace WebApiUtilities.Identity
                 },
                 ApiScopes = new List<ApiScope>() { new ApiScope("api1", "My API") },
                 ApiResources = new List<ApiResource>() { new ApiResource("api1", "My API") },
-                IdentityResources = new List<IdentityResource> 
+                IdentityResources = new List<IdentityResource>
                 {
                     new IdentityResources.OpenId(),
                     new IdentityResources.Email(),
@@ -60,7 +58,7 @@ namespace WebApiUtilities.Identity
                         ClientId = "client",
                         RedirectUris = { "https://localhost:5003" },
                         // no interactive user, use the clientid/secret for authentication
-                        AllowedGrantTypes = 
+                        AllowedGrantTypes =
                         {
                             GrantType.ResourceOwnerPassword,
                             GrantType.ClientCredentials,

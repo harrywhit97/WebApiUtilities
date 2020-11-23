@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using IdentityServer4.AspNetIdentity;
 using MediatR;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -27,7 +29,8 @@ namespace WebApiUtilities.Extenstions
     {
         static readonly Type iRequestHandler = typeof(IRequestHandler<,>);
 
-        public static void AddWebApiServices(this IServiceCollection services, string apiTitle, int apiVersion = 1)
+        public static void AddWebApiServices<TDbContext>(this IServiceCollection services, string apiTitle, int apiVersion = 1)
+            where TDbContext : IdentityDbContext<User>
         {
             services.AddOData();
             services.AddControllers();
@@ -90,10 +93,54 @@ namespace WebApiUtilities.Extenstions
                 options.User.RequireUniqueEmail = false;
             });
 
+            RegisterIdentity<TDbContext>(services);
+
             services.AddTransient<AppSettings>();
             services.AddTransient<IUserService, UserService>();
 
             RegisterRecords(services);
+        }
+
+        private static void RegisterIdentity<TDbContext>(IServiceCollection services)
+            where TDbContext : IdentityDbContext<User>
+        {
+            var Config = IdentityConfig.Default;
+
+            services.AddIdentityServer()
+                    .AddDeveloperSigningCredential() //This is for dev only scenarios when you don’t have a certificate to use.
+                    .AddInMemoryApiScopes(Config.ApiScopes)
+                    .AddInMemoryClients(Config.Clients)
+                    .AddInMemoryPersistedGrants()
+                    .AddInMemoryIdentityResources(Config.IdentityResources)
+                    .AddResourceOwnerValidator<ResourceOwnerPasswordValidator<User>>()
+                    .AddInMemoryApiResources(Config.ApiResources);
+
+            services.AddIdentityCore<User>(cfg =>
+            {
+                cfg.User.RequireUniqueEmail = true;
+            })
+                .AddEntityFrameworkStores<TDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                // base-address of your identityserver
+                options.Authority = "https://localhost:5003";
+
+                // name of the API resource
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateAudience = false
+                };
+            });
+
+            services.AddTransient<SignInManager<User>>();
         }
 
         static void RegisterRecords(IServiceCollection services)

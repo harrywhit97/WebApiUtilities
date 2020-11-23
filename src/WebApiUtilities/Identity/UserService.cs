@@ -52,7 +52,7 @@ namespace WebApiUtilities.Identity
         {
             var user = await AuthenticateUser(model);
 
-            if (user == null) 
+            if (user == null)
                 return null;
 
             var token = GenerateJwtToken(user);
@@ -64,7 +64,7 @@ namespace WebApiUtilities.Identity
         {
             var user = await _userManager.FindByEmailAsync(userRegistration.Email);
 
-            if(user != null)
+            if (user != null)
                 throw new Exception("A user already exists with that email.");
 
             user = new User()

@@ -1,12 +1,6 @@
-﻿using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.EntityFramework.Interfaces;
-using IdentityServer4.EntityFramework.Options;
-using IdentityServer4.Stores;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
 using TodoExampleApi.Models;
 using WebApiUtilities.Abstract;
-using WebApiUtilities.Identity;
 using WebApiUtilities.Interfaces;
 
 namespace TodoExampleApi
