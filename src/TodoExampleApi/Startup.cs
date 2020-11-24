@@ -37,7 +37,7 @@ namespace TodoExampleApi
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
-            
+
             app.AddWebApiUtilities(GetEdmModel(), userService, ApiTitle);
         }
 

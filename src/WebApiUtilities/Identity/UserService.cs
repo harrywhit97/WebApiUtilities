@@ -111,7 +111,7 @@ namespace WebApiUtilities.Identity
             if (user != null)
                 return;
 
-            var userRegisteration = new UserRegistration() 
+            var userRegisteration = new UserRegistration()
             {
                 UserName = _appSettings.SystemUserName,
                 Password = _appSettings.SystemUserPassword,
