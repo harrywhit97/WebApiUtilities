@@ -5,12 +5,12 @@ using WebApiUtilities.Interfaces;
 
 namespace TodoExampleApi
 {
-    public class TodoListContext : AuditingDbContext
+    public class TodoListContext : AuditingDbContext<long>
     {
         public DbSet<TodoItem> Todos { get; set; }
         //public DbSet<TodoList> TodoLists { get; set; }
 
-        public TodoListContext(DbContextOptions options, IClock clock)
+        public TodoListContext(DbContextOptions options, ITimeService clock)
             : base(options, clock)
         {
         }

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OData.Edm;
+using TodoExampleApi.Features.TodoItems;
 using TodoExampleApi.Models;
 using WebApiUtilities.Extenstions;
 using WebApiUtilities.Identity;
@@ -31,6 +32,7 @@ namespace TodoExampleApi
                 options.UseInMemoryDatabase("Todo"));
 
             services.AddWebApiServices<TodoListContext>(ApiTitle);
+            services.AddTransient<ITodoService, TodoItemService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IUserService userService)

@@ -13,9 +13,7 @@ namespace WebApiUtilities.Abstract
         private readonly TDbContext _dbContext;
 
         public BaseRecordService(TDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+            => _dbContext = dbContext;
 
         public async Task<T> Create(T record)
         {
@@ -48,10 +46,9 @@ namespace WebApiUtilities.Abstract
         public async Task<T> Update(T record)
         {
             var existingEntity = await _dbContext.Set<T>().FindAsync(record.Id)
-                            ?? throw new NotFoundException(typeof(T).Name, record.Id);
+                ?? throw new NotFoundException(typeof(T).Name, record.Id);
 
             _dbContext.Entry(existingEntity).State = EntityState.Detached;
-
 
             _dbContext.Entry(record).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();

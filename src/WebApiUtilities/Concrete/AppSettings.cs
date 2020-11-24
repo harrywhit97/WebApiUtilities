@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
+using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.Concrete
 {
-    public class AppSettings
+    public class AppSettings : IAppSettings
     {
         public string JWTKey { get; set; }
         public string SystemUserName { get; set; }
@@ -12,9 +13,9 @@ namespace WebApiUtilities.Concrete
         public AppSettings(IConfiguration configuration)
         {
             JWTKey = configuration[$"AppSettings:{nameof(JWTKey)}"];
-            SystemUserName = "systemuser";
-            SystemUserPassword = "Test1!";
-            SystemUserEmail = "system@user.com";
+            SystemUserName = configuration[$"AppSettings:{nameof(SystemUserName)}"];
+            SystemUserPassword = configuration[$"AppSettings:{nameof(SystemUserPassword)}"];
+            SystemUserEmail = configuration[$"AppSettings:{nameof(SystemUserEmail)}"];
         }
     }
 }

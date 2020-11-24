@@ -7,11 +7,11 @@ using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.Abstract
 {
-    public class AuditingDbContext : IdentityDbContext<User>, IAuditingDbContext
+    public class AuditingDbContext<TId> : IdentityDbContext<User>, IAuditingDbContext
     {
-        readonly IClock clock;
+        readonly ITimeService clock;
 
-        public AuditingDbContext(DbContextOptions options, IClock clock)
+        public AuditingDbContext(DbContextOptions options, ITimeService clock)
             : base(options)
         {
             this.clock = clock;
@@ -19,7 +19,7 @@ namespace WebApiUtilities.Abstract
 
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
-            foreach (var entry in ChangeTracker.Entries<AuditableEntity<long>>()) //TODO change <long> to find any auditible entity
+            foreach (var entry in ChangeTracker.Entries<AuditableEntity<TId>>()) //TODO change <long> to find any auditible entity
             {
                 switch (entry.State)
                 {

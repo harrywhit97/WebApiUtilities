@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using IdentityServer4.AspNetIdentity;
-using MediatR;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -21,14 +20,11 @@ using WebApiUtilities.Abstract;
 using WebApiUtilities.Concrete;
 using WebApiUtilities.Identity;
 using WebApiUtilities.Interfaces;
-using WebApiUtilities.PipelineBehaviours;
 
 namespace WebApiUtilities.Extenstions
 {
     public static class IServiceCollectionExtensions
     {
-        static readonly Type iRequestHandler = typeof(IRequestHandler<,>);
-
         public static void AddWebApiServices<TDbContext>(this IServiceCollection services, string apiTitle, int apiVersion = 1)
             where TDbContext : IdentityDbContext<User>
         {
@@ -51,13 +47,8 @@ namespace WebApiUtilities.Extenstions
 
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
-            services.AddMediatR(Assembly.GetExecutingAssembly());
 
-            services.AddTransient<IClock, Clock>();
-
-            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
-            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
+            services.AddTransient<ITimeService, TimeService>();
 
             //RegisterValidators(services);
             services.AddSingleton<AppSettings>();
@@ -205,9 +196,9 @@ namespace WebApiUtilities.Extenstions
                         .FirstOrDefault();
         }
 
-        static void RegisterValidators(IServiceCollection services)
-        {
-            var assembly = Assembly.GetEntryAssembly();
+        //static void RegisterValidators(IServiceCollection services)
+        //{
+        //    var assembly = Assembly.GetEntryAssembly();
 
             //var creates = ExtensionHelpers.ExtractTypesFromAssembly(assembly, typeof(ICreateCommand<,>));
             //var updates = ExtensionHelpers.ExtractTypesFromAssembly(assembly, typeof(IUpdateCommand<,>));
@@ -223,22 +214,22 @@ namespace WebApiUtilities.Extenstions
             //    MakeAndAddRequestValidatorService(creates, dtoType, validator, services);
             //    MakeAndAddRequestValidatorService(updates, dtoType, validator, services);
             //}
-        }
+        //}
 
-        static void MakeAndAddRequestValidatorService(IEnumerable<Type> requests, Type dto, Type validator, IServiceCollection services)
-        {
-            var request = requests.Where(x => x.BaseType?.Equals(dto) ?? false)
-                    .FirstOrDefault();
+        //static void MakeAndAddRequestValidatorService(IEnumerable<Type> requests, Type dto, Type validator, IServiceCollection services)
+        //{
+        //    var request = requests.Where(x => x.BaseType?.Equals(dto) ?? false)
+        //            .FirstOrDefault();
 
-            var requestValidator = validator.MakeGenericType(request);
-            RegisterValidatorService(request, requestValidator, services);
-        }
+        //    var requestValidator = validator.MakeGenericType(request);
+        //    RegisterValidatorService(request, requestValidator, services);
+        //}
 
-        static void RegisterValidatorService(Type request, Type validator, IServiceCollection services)
-        {
-            var iValidator = typeof(IValidator<>);
-            var serviceType = iValidator.MakeGenericType(request);
-            services.AddTransient(serviceType, validator);
-        }
+        //static void RegisterValidatorService(Type request, Type validator, IServiceCollection services)
+        //{
+        //    var iValidator = typeof(IValidator<>);
+        //    var serviceType = iValidator.MakeGenericType(request);
+        //    services.AddTransient(serviceType, validator);
+        //}
     }
 }
