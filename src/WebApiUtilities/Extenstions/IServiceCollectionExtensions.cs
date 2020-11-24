@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
@@ -25,7 +26,7 @@ namespace WebApiUtilities.Extenstions
 {
     public static class IServiceCollectionExtensions
     {
-        public static void AddWebApiServices<TDbContext>(this IServiceCollection services, string apiTitle, int apiVersion = 1)
+        public static void AddWebApiServices<TDbContext>(this IServiceCollection services, IConfiguration configuration, string apiTitle, int apiVersion = 1)
             where TDbContext : IdentityDbContext<User>
         {
             services.AddOData();
@@ -50,9 +51,8 @@ namespace WebApiUtilities.Extenstions
 
             services.AddTransient<ITimeService, TimeService>();
 
-            //RegisterValidators(services);
             services.AddSingleton<AppSettings>();
-            RegisterIdentity<TDbContext>(services);
+            RegisterIdentity<TDbContext>(services, configuration);
             RegisterRecords(services);
         }
 
@@ -106,7 +106,7 @@ namespace WebApiUtilities.Extenstions
             });
         }
 
-        private static void RegisterIdentity<TDbContext>(IServiceCollection services)
+        private static void RegisterIdentity<TDbContext>(IServiceCollection services, IConfiguration configuration)
             where TDbContext : IdentityDbContext<User>
         {
             services.Configure<IdentityOptions>(options =>
@@ -130,7 +130,8 @@ namespace WebApiUtilities.Extenstions
                 options.User.RequireUniqueEmail = true;
             });
 
-            var Config = IdentityConfig.Default;
+            var appSettings = new AppSettings(configuration);
+            var Config = IdentityConfig.GetDefault(appSettings);
 
             services.AddIdentityServer()
                     .AddDeveloperSigningCredential() //This is for dev only scenarios when you don’t have a certificate to use.
@@ -156,7 +157,7 @@ namespace WebApiUtilities.Extenstions
             .AddJwtBearer(options =>
             {
                 // base-address of your identityserver
-                options.Authority = "https://localhost:5003";
+                options.Authority = appSettings.HttpsUrl;
 
                 // name of the API resource
                 options.RequireHttpsMetadata = false;

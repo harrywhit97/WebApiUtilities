@@ -16,13 +16,12 @@ namespace TodoExampleApi
     public class Startup
     {
         const string ApiTitle = "TodoApi";
+        public IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -31,7 +30,7 @@ namespace TodoExampleApi
             services.AddDbContext<TodoListContext>(options =>
                 options.UseInMemoryDatabase("Todo"));
 
-            services.AddWebApiServices<TodoListContext>(ApiTitle);
+            services.AddWebApiServices<TodoListContext>(Configuration, ApiTitle);
             services.AddTransient<ITodoService, TodoItemService>();
         }
 

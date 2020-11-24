@@ -1,10 +1,11 @@
 ﻿using IdentityServer4;
 using IdentityServer4.Models;
 using System.Collections.Generic;
+using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.Identity
 {
-    public class IdentityConfig
+    public class IdentityConfig : IIdentityConfig
     {
         public string ClientId { get; set; }
         public string ClientName { get; set; }
@@ -18,32 +19,31 @@ namespace WebApiUtilities.Identity
         public IEnumerable<ApiScope> ApiScopes { get; set; }
         public IEnumerable<ApiResource> ApiResources { get; set; }
         public IEnumerable<Client> Clients { get; set; }
-        public static IdentityConfig Default => GetDefault();
 
         public IEnumerable<IdentityResource> IdentityResources { get; set; }
 
-        private static IdentityConfig GetDefault()
+        public static IdentityConfig GetDefault(IAppSettings appSettings)
         {
             return new IdentityConfig()
             {
-                ClientId = "client",
-                ClientName = "Client",
+                ClientId = appSettings.IdentityClientId,
+                ClientName = appSettings.IdentityClientName,
                 AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
                 RequireConsent = false,
-                ClientSecrets = new List<Secret> { new Secret("secret".Sha256()) },
-                RedirectUris = new List<string>() { "http://localhost:5002/signin-oidc" },
-                PostLogoutRedirectUris = new List<string>() { "http://localhost:5002/signout-callback-oidc" },
+                ClientSecrets = new List<Secret> { new Secret(appSettings.IdentityClientSecret.Sha256()) },
+                RedirectUris = new List<string>() { $"{appSettings.HttpUrl}/signin-oidc" },
+                PostLogoutRedirectUris = new List<string>() { $"{appSettings.HttpUrl}/signout-callback-oidc" },
                 AllowedScopes = new List<string>()
                 {
                     IdentityServerConstants.StandardScopes.OpenId,
                     IdentityServerConstants.StandardScopes.Profile,
                     IdentityServerConstants.StandardScopes.Email,
                     IdentityServerConstants.StandardScopes.Address,
-                    "api1",
-                    "My API"
+                    appSettings.IdentityApiName,
+                    appSettings.IdentityApiDisplayName
                 },
-                ApiScopes = new List<ApiScope>() { new ApiScope("api1", "My API") },
-                ApiResources = new List<ApiResource>() { new ApiResource("api1", "My API") },
+                ApiScopes = new List<ApiScope>() { new ApiScope(appSettings.IdentityApiName, appSettings.IdentityApiDisplayName) },
+                ApiResources = new List<ApiResource>() { new ApiResource(appSettings.IdentityApiName, appSettings.IdentityApiDisplayName) },
                 IdentityResources = new List<IdentityResource>
                 {
                     new IdentityResources.OpenId(),
@@ -55,8 +55,8 @@ namespace WebApiUtilities.Identity
                 {
                     new Client
                     {
-                        ClientId = "client",
-                        RedirectUris = { "https://localhost:5003" },
+                        ClientId = appSettings.IdentityClientId,
+                        RedirectUris = { appSettings.HttpsUrl },
                         // no interactive user, use the clientid/secret for authentication
                         AllowedGrantTypes =
                         {
@@ -68,11 +68,11 @@ namespace WebApiUtilities.Identity
                         // secret for authentication
                         ClientSecrets =
                         {
-                            new Secret("secret".Sha256())
+                            new Secret(appSettings.IdentityClientSecret.Sha256())
                         },
 
                         // scopes that client has access to
-                        AllowedScopes = { "api1" },
+                        AllowedScopes = { appSettings.IdentityApiName },
                     }
                 }
             };

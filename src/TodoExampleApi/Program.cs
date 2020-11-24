@@ -26,6 +26,5 @@ namespace TodoExampleApi
                     webBuilder.UseKestrel();
                     webBuilder.UseStartup<Startup>();
                 });
-        //.UseWindowsService();
     }
 }
