@@ -1,28 +1,34 @@
+
 # WebApiUtilities
  
- WebApiUtilities is a library that contains tools to facilitate the rapid development of RESTful ASP .Net Core 3.1 Web APIs utilising Entity Framework Core, Fluent Validation, Odata and Swagger.
+ WebApiUtilities is a library that contains tools to facilitate the rapid development of RESTful ASP .Net Core 3.1 Web APIs utilising Entity Framework Core, Identity Server 4, JWT style authentication, Odata and Swagger.
  
  
  ## Getting set up
  
  1. Make a new ASP .Net Core 3.1 Web API project and install the WebApiUtilities nuget package.
- 2. For each model you need to add the following classes
-    1. Model which inherits `Entity<TId>` **OR** `AuditableEntity<TId>`
-    1. DTO which inherits `Dto<TModel, TId>` and contains the same properties as TModel
-    1. DTO validator which inherits `DtoValidator<TDto, Dto>` where `Dto` is the DTO made previously
-    1. Model configuration which inherits `IEntityTypeConfiguration<TModel>`
-    1. **Optional:** If you want to be able to create the model via the API add a create command which inherits the DTO made previously and `ICreateCommand<TModel, TId>`
-    1. **Optional:** If you want to be able to update (PUT) the model via the API add an update command which inherits the DTO made previously and `IUpdateCommand<TModel, TId`
-    1. A controller which inherits either `CrudController<TModel, TId, TCreateCommand, TUpdateCommand>` **OR** `ReadOnlyController<TModel, TId>`
- 3. Make a DbContext which inherits either `AuditingDbContext` **OR** `DbContext`
- 4. In the ConfigureServices method of Startup.cs configure your DbContext then add the following line.
+ 2. For each domain model you wish to expose in the API you need to add the following classes
+    1. Model which inherits from `Entity<TId>` **OR** `AuditableEntity<TId>`
+    1. DTO which inherits from `Dto<TModel, TId>` and contains the same properties as TModel
+    1. A service interface which implemets `IRecordService<TModel, TId>`
+    1. A concrete service which inherits from `BaseRecordService<TDbContext, TModel, TId>` and inherits the service interface that you made previously.
+    1. A controller which inherits from `RecordController<TModel, TId, TDto>`
+ 3. Make a DbContext which inherits either `AuditingDbContext` **OR** `IdentityDbContext`
+ 4. In the ConfigureServices method of Startup.cs configure your DbContext, then add the following line. Also register the services that you made,
+ 
 ```C#
-services.AddWebApiServices(ApiTitle, ApiVersion);
+services.AddWebApiServices<TDbContext>(ApiTitle);
 ```
- 5. In the Configure method of Startup.cs add the following
+ 5. In the Configure method of Startup.cs add IUserService to its signature, remove all of its contents except the use developer exception page if statment and add web api utitities. It should look like the following.
  
  ```C#
-app.AddWebApiUtilities(GetEdmModel(), MaxTop, ApiVersion);
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IUserService userService)
+{
+    if (env.IsDevelopment())
+        app.UseDeveloperExceptionPage();
+
+    app.AddWebApiUtilities(GetEdmModel(), userService, {ApiTitle});
+}
  ```
  6. In Startup.cs add the following method
 
@@ -39,17 +45,28 @@ app.AddWebApiUtilities(GetEdmModel(), MaxTop, ApiVersion);
  ```
  
  ## Adding endpoints
- WebAppUtilities utilises MediatR to maintain SOLID principles so it is recommended that for each new endpoint a IRequest and IRequestHandler is made and then in the controller  you give the desired request to the mediatr.
+To add new endpoints for a model add a new method to the service interface then implement it in the concrete service. Then expose this methof in the record controller with the appropriate http verb and path.
+
+ ## App settings
+ Add a AppSettings section to appsettings.json then add the following keys and values to it.
+ - `JWTKey` - a string of characters which will be used to sign Json Web Tokens
+ - `SystemUserName` - the name of the system user for your api service
+ - `SystemUserPassword` - the password of the system user
+ - `SystemUserEmail` - the email of the system user
  
- To add new endpoints for a model add a new method to the CrudController/ReadOnlyController, decorate it with the desired HTTP method and send the Mediatr the request you made for the endpoint.
- 
- To add non entity related endpoints make a new controller which inherits `ApiController`. This will give you access to the Mediatr to send your request to. 
- 
+ The system user name, password and email can be used to access the api via postman
+  
  ## Endpoints
- * API endpoints are available at `/api/<TModel>/{id}`
+ * API endpoints are available at `/api/<TModel>/{id?}`
  * The Swagger UI is available at `/swagger`
  * Odata querying is available at `/api/<TModel>?$<query string>`
+ * The identity server endpoint description is available at `/.well-known/openid-configuration`
+ * A user registration endpoint is available at `/api/user/register`
  
  ## Other features
- IClock an abstraction around DateTime.Now which is by default bound to the Ioc container at startup and can be injected where needed and mocked in tests.
+ ITimeService an abstraction around DateTime which is by default bound to the Ioc container at startup and can be injected where needed and mocked in tests.
  
+ ## Todo:
+ - Add entity configurations
+ - Add model validations
+ - Add RBAC authorization
