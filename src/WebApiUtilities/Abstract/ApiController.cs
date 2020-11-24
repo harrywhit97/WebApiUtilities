@@ -1,13 +1,10 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApiUtilities.Abstract
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public abstract class ApiController : ControllerBase
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public abstract class ApiController : UnsecuredController
     {
-        IMediator mediator;
-        protected IMediator Mediator => mediator ??= HttpContext.RequestServices.GetService(typeof(IMediator)) as IMediator;
     }
 }

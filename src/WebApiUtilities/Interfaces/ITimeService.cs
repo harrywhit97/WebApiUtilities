@@ -2,8 +2,9 @@
 
 namespace WebApiUtilities.Interfaces
 {
-    public interface IClock
+    public interface ITimeService
     {
         public DateTimeOffset Now { get; }
+        public DateTimeOffset UtcNow { get; }
     }
 }

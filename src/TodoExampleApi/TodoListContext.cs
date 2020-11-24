@@ -5,13 +5,13 @@ using WebApiUtilities.Interfaces;
 
 namespace TodoExampleApi
 {
-    public class TodoListContext : AuditingDbContext
+    public class TodoListContext : AuditingDbContext<long>
     {
         public DbSet<TodoItem> Todos { get; set; }
-        public DbSet<TodoList> TodoLists { get; set; }
+        //public DbSet<TodoList> TodoLists { get; set; }
 
-        public TodoListContext(DbContextOptions<TodoListContext> options, IClock clock)
-            :base(options, clock)
+        public TodoListContext(DbContextOptions options, ITimeService clock)
+            : base(options, clock)
         {
         }
 
@@ -19,14 +19,14 @@ namespace TodoExampleApi
         {
             modelbuilder.ApplyConfigurationsFromAssembly(typeof(TodoListContext).Assembly);
 
-            modelbuilder.Entity<TodoItem>()
-                .HasOne(t => t.List)
-                .WithMany(l => l.Todos);
-            
-            modelbuilder.Entity<TodoList>()
-                .HasMany(l => l.Todos)
-                .WithOne(t => t.List)
-                .OnDelete(DeleteBehavior.Cascade);
+            //modelbuilder.Entity<TodoItem>()
+            //    .HasOne(t => t.List)
+            //    .WithMany(l => l.Todos);
+
+            //modelbuilder.Entity<TodoList>()
+            //    .HasMany(l => l.Todos)
+            //    .WithOne(t => t.List)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelbuilder);
         }

@@ -1,24 +1,25 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
+using WebApiUtilities.Identity;
 using WebApiUtilities.Interfaces;
 
 namespace WebApiUtilities.Abstract
 {
-    public class AuditingDbContext : DbContext
+    public class AuditingDbContext<TId> : IdentityDbContext<User>, IAuditingDbContext
     {
-        readonly IClock clock;
+        readonly ITimeService clock;
 
-        public AuditingDbContext(DbContextOptions options, IClock clock)
-            :base(options)
+        public AuditingDbContext(DbContextOptions options, ITimeService clock)
+            : base(options)
         {
             this.clock = clock;
         }
 
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
-            foreach (var entry in ChangeTracker.Entries<AuditableEntity<long>>()) //TODO change <long> to find any auditible entity
+            foreach (var entry in ChangeTracker.Entries<AuditableEntity<TId>>()) //TODO change <long> to find any auditible entity
             {
                 switch (entry.State)
                 {
