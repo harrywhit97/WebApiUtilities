@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace WebApiUtilities.Interfaces
+﻿namespace WebApiUtilities.Interfaces
 {
     public interface IAppSettings
     {

@@ -7,7 +7,7 @@
     <Description>Framework to enable the fast development of ASP.Net Core 3.1 Web APIs utilising Swagger and OData.</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Company>Whit Development</Company>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>

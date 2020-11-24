@@ -195,41 +195,5 @@ namespace WebApiUtilities.Extenstions
                         .GetGenericArguments()
                         .FirstOrDefault();
         }
-
-        //static void RegisterValidators(IServiceCollection services)
-        //{
-        //    var assembly = Assembly.GetEntryAssembly();
-
-            //var creates = ExtensionHelpers.ExtractTypesFromAssembly(assembly, typeof(ICreateCommand<,>));
-            //var updates = ExtensionHelpers.ExtractTypesFromAssembly(assembly, typeof(IUpdateCommand<,>));
-            //var validators = ExtensionHelpers.ExtractTypesFromAssembly(assembly, typeof(IValidator<>));
-
-            //foreach (var validator in validators)
-            //{
-            //    var dtoType = validator.GetInterfaces()
-            //        .FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IValidate<>))
-            //        .GetGenericArguments()
-            //        .FirstOrDefault();
-
-            //    MakeAndAddRequestValidatorService(creates, dtoType, validator, services);
-            //    MakeAndAddRequestValidatorService(updates, dtoType, validator, services);
-            //}
-        //}
-
-        //static void MakeAndAddRequestValidatorService(IEnumerable<Type> requests, Type dto, Type validator, IServiceCollection services)
-        //{
-        //    var request = requests.Where(x => x.BaseType?.Equals(dto) ?? false)
-        //            .FirstOrDefault();
-
-        //    var requestValidator = validator.MakeGenericType(request);
-        //    RegisterValidatorService(request, requestValidator, services);
-        //}
-
-        //static void RegisterValidatorService(Type request, Type validator, IServiceCollection services)
-        //{
-        //    var iValidator = typeof(IValidator<>);
-        //    var serviceType = iValidator.MakeGenericType(request);
-        //    services.AddTransient(serviceType, validator);
-        //}
     }
 }

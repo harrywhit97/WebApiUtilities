@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TodoExampleApi.Models;
 using WebApiUtilities.Abstract;
-using WebApiUtilities.Interfaces;
 
 namespace TodoExampleApi.Features.TodoItems
 {
